@@ -33,13 +33,20 @@
     .brand{display:flex;align-items:center;gap:11px;min-height:var(--topbar);padding:0 20px;border-bottom:1px solid var(--border)}
     .brand-mark{display:grid;width:34px;height:34px;place-items:center;border-radius:9px;background:var(--accent);color:#fff;font-size:12px;font-weight:800}
     .brand-copy strong{display:block;font-size:13px;letter-spacing:-.02em}.brand-copy span{display:block;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
-    .nav-scroll{flex:1;overflow:auto;padding:16px 12px 24px;scrollbar-width:thin}
-    .nav-group+.nav-group{margin-top:17px}.nav-label{display:block;margin:0 10px 6px;color:var(--muted-2);font-size:9px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
-    .nav-button{position:relative;display:flex;width:100%;min-height:39px;align-items:center;gap:10px;padding:8px 11px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font-size:11px;font-weight:700;transition:.18s}
+    .nav-scroll{flex:1;overflow:auto;padding:14px 12px 24px;scrollbar-width:thin}
+    .nav-group+.nav-group{margin-top:4px}
+    .nav-button{position:relative;display:flex;width:100%;min-height:42px;align-items:center;padding:9px 11px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font-size:11px;font-weight:700;transition:.18s}
     .nav-button:hover{background:var(--surface-2);color:var(--text)}.nav-button.is-active{background:var(--accent-soft);color:var(--accent)}
-    .nav-button.is-active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:99px;background:var(--accent)}
-    .nav-icon{display:grid;width:22px;height:22px;place-items:center;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-size:9px;font-weight:800}
-    .nav-button.is-active .nav-icon{border-color:color-mix(in srgb,var(--accent) 35%,var(--border));background:var(--accent);color:#fff}
+    .nav-button.is-active::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:99px;background:var(--accent)}
+    .nav-primary{justify-content:space-between;color:var(--text);font-size:11px;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+    .nav-primary.is-active{color:var(--accent)}.nav-primary.is-active::before{display:none}
+    .nav-group.is-open .nav-primary{background:var(--surface-2)}.nav-group.has-active .nav-primary{background:var(--accent-soft);color:var(--accent)}
+    .nav-chevron{color:var(--muted-2);font-size:14px;line-height:1;transition:transform .18s}.nav-group.is-open .nav-chevron{transform:rotate(90deg)}
+    .nav-submenu{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.nav-submenu-inner{min-height:0;overflow:hidden}
+    .nav-group.is-open .nav-submenu{grid-template-rows:1fr}
+    .nav-child{min-height:36px;margin:2px 0;padding:7px 12px 7px 25px;font-size:10px;font-weight:650}
+    .nav-child::after{content:"";position:absolute;left:13px;top:50%;width:4px;height:4px;border-radius:50%;background:var(--border);transform:translateY(-50%)}
+    .nav-child.is-active::after{background:var(--accent)}.nav-child.is-active::before{display:none}
     .sidebar-summary{padding:15px 16px;border-top:1px solid var(--border);background:var(--surface-2)}
     .sidebar-summary-head{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}
     .summary-track{height:6px;margin:8px 0 7px;overflow:hidden;border-radius:99px;background:var(--border)}.summary-bar{display:block;width:0;height:100%;border-radius:99px;background:var(--accent);transition:width .3s}
@@ -79,38 +86,47 @@
       </div>
       <nav class="nav-scroll" id="mainNav">
         <div class="nav-group">
-          <span class="nav-label">Panel</span>
-          <button class="nav-button is-active" type="button" data-view="inicio"><span class="nav-icon">01</span>Inicio</button>
+          <button class="nav-button nav-primary is-active" type="button" data-view="inicio">Inicio</button>
         </div>
-        <div class="nav-group">
-          <span class="nav-label">Estrategia</span>
-          <button class="nav-button" type="button" data-view="diagnostico"><span class="nav-icon">02</span>Diagnóstico</button>
-          <button class="nav-button" type="button" data-view="top5"><span class="nav-icon">03</span>Top 5</button>
-          <button class="nav-button" type="button" data-view="seleccion"><span class="nav-icon">04</span>Selección</button>
-          <button class="nav-button" type="button" data-view="brechas"><span class="nav-icon">05</span>Brechas</button>
+        <div class="nav-group" data-nav-group="estrategia">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="estrategia" aria-expanded="false">Estrategia<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="diagnostico">Diagnóstico</button>
+            <button class="nav-button nav-child" type="button" data-view="top5">Rutas profesionales</button>
+            <button class="nav-button nav-child" type="button" data-view="seleccion">Selección</button>
+            <button class="nav-button nav-child" type="button" data-view="brechas">Brechas</button>
+          </div></div>
         </div>
-        <div class="nav-group">
-          <span class="nav-label">Aprendizaje</span>
-          <button class="nav-button" type="button" data-view="habilidades"><span class="nav-icon">06</span>Habilidades</button>
-          <button class="nav-button" type="button" data-view="roadmap"><span class="nav-icon">07</span>Roadmap</button>
-          <button class="nav-button" type="button" data-view="fuentes"><span class="nav-icon">08</span>Fuentes de aprendizaje</button>
+        <div class="nav-group" data-nav-group="aprendizaje">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="aprendizaje" aria-expanded="false">Aprendizaje<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="habilidades">Habilidades</button>
+            <button class="nav-button nav-child" type="button" data-view="roadmap">Roadmap</button>
+            <button class="nav-button nav-child" type="button" data-view="fuentes">Fuentes de aprendizaje</button>
+          </div></div>
         </div>
-        <div class="nav-group">
-          <span class="nav-label">Proyectos</span>
-          <button class="nav-button" type="button" data-view="home-credit"><span class="nav-icon">09</span>Home Credit</button>
-          <button class="nav-button" type="button" data-view="proyectos-secundarios"><span class="nav-icon">10</span>Proyectos secundarios</button>
+        <div class="nav-group" data-nav-group="proyectos">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="proyectos" aria-expanded="false">Proyectos<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="home-credit">Home Credit</button>
+            <button class="nav-button nav-child" type="button" data-view="proyectos-secundarios">Proyectos secundarios</button>
+          </div></div>
         </div>
-        <div class="nav-group">
-          <span class="nav-label">Productividad</span>
-          <button class="nav-button" type="button" data-view="plan-diario"><span class="nav-icon">11</span>Plan diario</button>
-          <button class="nav-button" type="button" data-view="energia"><span class="nav-icon">12</span>Energía mensual</button>
-          <button class="nav-button" type="button" data-view="lecturas"><span class="nav-icon">13</span>Lecturas</button>
+        <div class="nav-group" data-nav-group="productividad">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="productividad" aria-expanded="false">Productividad<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="plan-diario">Plan diario</button>
+            <button class="nav-button nav-child" type="button" data-view="energia">Energía mensual</button>
+            <button class="nav-button nav-child" type="button" data-view="lecturas">Lecturas</button>
+          </div></div>
         </div>
-        <div class="nav-group">
-          <span class="nav-label">Carrera</span>
-          <button class="nav-button" type="button" data-view="empleabilidad"><span class="nav-icon">14</span>Empleabilidad</button>
-          <button class="nav-button" type="button" data-view="certificaciones"><span class="nav-icon">15</span>Certificaciones</button>
-          <button class="nav-button" type="button" data-view="revision"><span class="nav-icon">16</span>Revisión semanal</button>
+        <div class="nav-group" data-nav-group="carrera">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="carrera" aria-expanded="false">Carrera<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="empleabilidad">Empleabilidad</button>
+            <button class="nav-button nav-child" type="button" data-view="certificaciones">Certificaciones</button>
+            <button class="nav-button nav-child" type="button" data-view="revision">Revisión semanal</button>
+          </div></div>
         </div>
       </nav>
       <div class="sidebar-summary">
@@ -126,7 +142,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <button class="shell-btn menu-button" id="menuBtn" type="button" aria-label="Abrir navegación">☰</button>
-          <div class="breadcrumbs"><span id="groupLabel">Panel</span><strong id="viewTitle">Inicio</strong></div>
+          <div class="breadcrumbs"><span id="groupLabel">Inicio</span><strong id="viewTitle">Inicio</strong></div>
         </div>
         <div class="top-actions">
           <button class="shell-btn primary" id="quickAddBtn" type="button" aria-label="Añadir un elemento" title="Añadir"><span>＋</span><span class="action-label">Añadir</span></button>
@@ -170,9 +186,9 @@
     var energyCharts={sleep:null,hours:null};
     var selectedMonth=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
     var viewMap={
-      inicio:{group:"Panel",title:"Inicio",sections:[".hero","#v2-inicio-extra"]},
+      inicio:{group:"Inicio",title:"Inicio",sections:[".hero","#v2-inicio-extra"]},
       diagnostico:{group:"Estrategia",title:"Diagnóstico",sections:["#diagnostico"]},
-      top5:{group:"Estrategia",title:"Top 5 de rutas",sections:["#top5"]},
+      top5:{group:"Estrategia",title:"Rutas profesionales",sections:["#top5"]},
       seleccion:{group:"Estrategia",title:"Selección estratégica",sections:["#seleccion"]},
       brechas:{group:"Estrategia",title:"Brechas prioritarias",sections:["#gaps"]},
       habilidades:{group:"Aprendizaje",title:"Habilidades",sections:["#tracker"]},
@@ -273,6 +289,24 @@
       childDoc.body.classList.remove("v2-sources-mode","v2-cert-mode","v2-employ-mode");
     }
 
+    function setOpenNavGroup(groupName){
+      document.querySelectorAll("[data-nav-group]").forEach(function(group){
+        var isOpen=group.dataset.navGroup===groupName;
+        group.classList.toggle("is-open",isOpen);
+        var toggle=group.querySelector("[data-group-toggle]");
+        if(toggle){
+          toggle.setAttribute("aria-expanded",isOpen?"true":"false");
+        }
+      });
+    }
+
+    function toggleNavGroup(groupName){
+      var group=document.querySelector('[data-nav-group="'+groupName+'"]');
+      if(!group)return;
+      var willOpen=!group.classList.contains("is-open");
+      setOpenNavGroup(willOpen?groupName:"");
+    }
+
     function showView(view,updateHash){
       if(!childDoc||!viewMap[view])return;
       activeView=view;var config=viewMap[view];resetChildModes();
@@ -287,7 +321,19 @@
         if(projectButton)projectButton.click();
       }
       childWin.scrollTo(0,0);
-      document.querySelectorAll("[data-view]").forEach(function(button){button.classList.toggle("is-active",button.dataset.view===view);button.setAttribute("aria-selected",button.dataset.view===view?"true":"false")});
+      document.querySelectorAll("[data-view]").forEach(function(button){
+        var isActive=button.dataset.view===view;
+        button.classList.toggle("is-active",isActive);
+        if(isActive)button.setAttribute("aria-current","page");else button.removeAttribute("aria-current");
+      });
+      var activeGroup=view==="inicio"?"":config.group.toLowerCase();
+      document.querySelectorAll("[data-nav-group]").forEach(function(group){
+        var hasActive=group.dataset.navGroup===activeGroup;
+        group.classList.toggle("has-active",hasActive);
+        var toggle=group.querySelector("[data-group-toggle]");
+        if(toggle)toggle.classList.toggle("is-active",hasActive);
+      });
+      setOpenNavGroup(activeGroup);
       document.getElementById("groupLabel").textContent=config.group;document.getElementById("viewTitle").textContent=config.title;
       localStorage.setItem(ACTIVE_KEY,view);
       if(updateHash!==false&&location.hash!=="#"+view)history.replaceState(null,"","#"+view);
@@ -370,7 +416,12 @@
     function showError(){document.getElementById("loading").classList.add("is-hidden");document.getElementById("errorPanel").classList.add("is-visible")}
 
     function bindShell(){
-      document.getElementById("mainNav").addEventListener("click",function(event){var button=event.target.closest("[data-view]");if(button)showView(button.dataset.view)});
+      document.getElementById("mainNav").addEventListener("click",function(event){
+        var viewButton=event.target.closest("[data-view]");
+        if(viewButton){showView(viewButton.dataset.view);return}
+        var groupButton=event.target.closest("[data-group-toggle]");
+        if(groupButton)toggleNavGroup(groupButton.dataset.groupToggle);
+      });
       document.getElementById("menuBtn").addEventListener("click",function(){document.body.classList.toggle("nav-open")});document.getElementById("backdrop").addEventListener("click",function(){document.body.classList.remove("nav-open")});
       document.getElementById("quickAddBtn").addEventListener("click",function(){document.getElementById("quickMenu").classList.toggle("is-open")});document.getElementById("quickMenu").addEventListener("click",function(event){var button=event.target.closest("[data-quick]");if(button)performQuick(button.dataset.quick)});
       document.getElementById("editBtn").addEventListener("click",function(){proxyClick("#editBtn");var editing=childDoc&&childDoc.body.classList.contains("is-editing");document.getElementById("editBtn").classList.toggle("primary",editing);document.getElementById("editBtn").querySelector(".action-label").textContent=editing?"Cerrar edición":"Editar"});
