@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Centro editable de aprendizaje, productividad y carrera en Datos e IA">
+  <title>Trainer de Carrera Tech — Centro de aprendizaje</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#f8fafc;--card:#fff;--text:#0f172a;--text-2:#64748b;--text-3:#94a3b8;
+      --accent:#2563eb;--green:#16a34a;--amber:#d97706;--red:#dc2626;--violet:#7c3aed;
+      --border:#e2e8f0;--soft:#eff6ff;--soft-green:#f0fdf4;--soft-amber:#fffbeb;
+      --soft-red:#fef2f2;--shadow:0 8px 24px rgba(15,23,42,.06)
+    }
+    :root[data-theme="dark"]{
+      --bg:#0a0a0a;--card:#171717;--text:#fafafa;--text-2:#a1a1aa;--text-3:#71717a;
+      --accent:#3b82f6;--green:#22c55e;--amber:#f59e0b;--red:#ef4444;--violet:#8b5cf6;
+      --border:#27272a;--soft:rgba(59,130,246,.12);--soft-green:rgba(34,197,94,.12);
+      --soft-amber:rgba(245,158,11,.12);--soft-red:rgba(239,68,68,.12);
+      --shadow:0 8px 24px rgba(0,0,0,.24)
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg);color:var(--text);scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 "Plus Jakarta Sans",system-ui,sans-serif}
+    button,input,select,textarea{font:inherit}
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,[contenteditable]:focus-visible{
+      outline:3px solid color-mix(in srgb,var(--accent) 40%,transparent);outline-offset:2px
+    }
+    a{color:var(--accent);text-underline-offset:3px}.container{width:min(1240px,calc(100% - 40px));margin-inline:auto}
+    .site-header{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px)}
+    .header-inner{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{font-size:15px;font-weight:800;letter-spacing:-.02em}.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 13px;border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text);cursor:pointer;font-size:12px;font-weight:800;transition:.2s}
+    .btn:hover{transform:translateY(-1px);border-color:var(--accent)}.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn-danger{color:var(--red)}.btn-small{min-height:32px;padding:5px 9px;font-size:10px}
+    .edit-status{display:none;color:var(--green);font-size:11px;font-weight:800}.is-editing .edit-status{display:inline}
+    main{padding-bottom:96px}section{margin-top:96px;scroll-margin-top:92px}.hero{margin-top:0;padding:80px 0 28px}
+    .eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+    h1,h2,h3,h4,p{margin-top:0}h1{max-width:900px;margin:14px 0 18px;font-size:56px;line-height:1.08;font-weight:800;letter-spacing:-.045em}
+    h2{margin-bottom:12px;font-size:29px;line-height:1.2;font-weight:700;letter-spacing:-.03em}
+    h3{margin-bottom:8px;font-size:21px;line-height:1.28;font-weight:700;letter-spacing:-.025em}
+    h4{margin-bottom:7px;font-size:14px;line-height:1.35;font-weight:800}
+    .hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(390px,.75fr);gap:44px;align-items:center}
+    .hero-copy{max-width:820px;color:var(--text-2);font-size:20px}.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+    .pill,.badge{display:inline-flex;align-items:center;width:max-content;padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--card);color:var(--text-2);font-size:11px;font-weight:800}
+    .badge{color:var(--accent);background:var(--soft);border-color:color-mix(in srgb,var(--accent) 35%,var(--border))}
+    .hero-progress{display:grid;grid-template-columns:190px 1fr;gap:24px;align-items:center;padding:28px;border:1px solid var(--border);border-radius:8px;background:var(--card);box-shadow:var(--shadow)}
+    .gauge{position:relative;display:grid;width:180px;height:180px;place-items:center}.gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+    .gauge circle{fill:none;stroke-width:12}.gauge-bg{stroke:var(--border)}.gauge-fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .6s}
+    .gauge-center{position:absolute;text-align:center}.gauge-value{display:block;font-size:48px;line-height:1;font-weight:800;letter-spacing:-.05em}.gauge-label{color:var(--text-2);font-size:10px;font-weight:800;text-transform:uppercase}
+    .hero-stat-list{display:grid;gap:13px}.hero-stat{padding-top:9px;border-top:1px solid var(--border)}.hero-stat span{display:block;color:var(--text-2);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.hero-stat strong{font-size:14px}
+    .bar-track{display:block;height:8px;overflow:hidden;border-radius:999px;background:color-mix(in srgb,var(--border) 80%,transparent)}.bar-fill{display:block;width:0;height:100%;border-radius:999px;background:var(--accent);transition:width .4s}
+    .section-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:28px}.section-head p{max-width:700px;margin:0;color:var(--text-2)}
+    .card{padding:30px;border:1px solid var(--border);border-radius:8px;background:var(--card);box-shadow:var(--shadow);break-inside:avoid}.card+.card{margin-top:20px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+    .metric{padding:20px;border-right:1px solid var(--border)}.metric:last-child{border-right:0}.metric span{display:block;color:var(--text-2);font-size:10px;font-weight:800;text-transform:uppercase}.metric strong{display:block;margin-top:6px;font-size:24px}
+    .note{margin-top:16px;color:var(--text-2);font-size:12px}.alert{padding:15px 18px;border-left:3px solid var(--amber);background:var(--soft-amber);color:var(--text-2);font-size:13px}.alert strong{color:var(--text)}
+    .editable{border-radius:4px;transition:.2s}.is-editing .editable{outline:1px dashed var(--accent);outline-offset:4px;background:var(--soft);cursor:text}.is-editing .editable:focus{outline:2px solid var(--accent)}
+    .diagnostic-layout{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:34px}.indicator-list{display:grid;gap:11px}.indicator{display:grid;grid-template-columns:minmax(150px,1fr) minmax(120px,1.4fr) 40px;gap:10px;align-items:center;font-size:12px}.indicator strong{text-align:right}.radar-wrap{height:380px}
+    .table-responsive{width:100%;overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:12px 11px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;font-size:12px;line-height:1.5}th{color:var(--text-2);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}tbody tr:last-child td{border-bottom:0}
+    .route-card{padding:22px;border-top:2px solid var(--accent)}.route-card p,.strategy-item p{color:var(--text-2);font-size:12px}.route-score{font-size:38px;font-weight:800;line-height:1}
+    .strategy-item{padding:24px;border-right:1px solid var(--border)}.strategy-item:last-child{border-right:0}.strategy-item ul{padding-left:18px;color:var(--text-2);font-size:12px}
+    .tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--border)}.tab-btn{flex:0 0 auto;padding:12px 14px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--text-2);cursor:pointer;font-size:12px;font-weight:800}.tab-btn:hover{background:var(--soft);color:var(--text)}.tab-btn.is-active{color:var(--accent);border-bottom-color:var(--accent)}.tab-content{display:none;padding-top:24px}.tab-content.is-active{display:block}
+    .gap-bar{position:relative;min-width:140px;height:10px;overflow:hidden;border-radius:999px;background:var(--border)}.gap-target,.gap-current{position:absolute;inset-block:0;left:0}.gap-target{background:color-mix(in srgb,var(--accent) 24%,transparent)}.gap-current{background:var(--green)}
+    .allocation-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:28px;align-items:center}.allocation-chart{height:280px}.hour-stack{display:flex;height:34px;overflow:hidden;border-radius:6px;background:var(--border)}.hour-part{display:grid;place-items:center;min-width:30px;color:#fff;font-size:9px;font-weight:800}.hour-part:nth-child(1){background:#2563eb}.hour-part:nth-child(2){background:#16a34a}.hour-part:nth-child(3){background:#d97706}.hour-part:nth-child(4){background:#7c3aed}.hour-part:nth-child(5){background:#db2777}
+    .program-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.program-card{padding:22px;border:1px solid var(--border);border-radius:7px;background:var(--card)}.program-card.is-primary{border-top:3px solid var(--accent)}.program-card h3{font-size:17px}.program-card p{color:var(--text-2);font-size:12px}.module-list{display:grid;gap:7px;margin-top:14px}.check-row{display:flex;align-items:flex-start;gap:8px;color:var(--text-2);font-size:11px}.check-row input{margin-top:3px;accent-color:var(--green)}
+    .timeline{display:grid;grid-template-columns:repeat(23,minmax(42px,1fr));gap:3px;overflow-x:auto;padding-bottom:8px}.week-node{display:grid;min-height:56px;place-items:center;border:1px solid var(--border);border-radius:5px;background:var(--card);color:var(--text-2);font-size:10px;font-weight:800}.week-node.is-current{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);color:var(--accent)}.week-node.is-complete{background:var(--soft-green);border-color:var(--green);color:var(--green)}
+    .week-list{display:grid;gap:10px;margin-top:20px}details.week{border:1px solid var(--border);border-radius:8px;background:var(--card)}details.week[open]{box-shadow:var(--shadow)}details.week summary{display:grid;grid-template-columns:72px minmax(0,1fr) 150px 34px;gap:14px;align-items:center;padding:18px 20px;cursor:pointer;list-style:none}details.week summary::-webkit-details-marker{display:none}.week-number{color:var(--accent);font-size:11px;font-weight:800;text-transform:uppercase}.week-title{font-weight:800}.week-phase{display:block;color:var(--text-2);font-size:11px}.week-progress{display:grid;grid-template-columns:1fr 34px;gap:8px;align-items:center}.week-body{padding:20px;border-top:1px solid var(--border)}
+    .field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field{display:grid;gap:6px;min-width:0}.field.span-2{grid-column:span 2}.field.full{grid-column:1/-1}.field label{color:var(--text-2);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}.control{width:100%;min-height:40px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:12px}.control.compact{min-height:34px;padding:5px 7px}textarea.control{min-height:72px;resize:vertical}
+    .task-list{display:grid;gap:7px;margin:14px 0}.task-row{display:grid;grid-template-columns:24px minmax(0,1fr) 34px;gap:7px;align-items:center}.task-row input[type="checkbox"]{accent-color:var(--green)}
+    .action-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}.inline-total{margin-left:auto;color:var(--text-2);font-size:11px}.inline-total strong{color:var(--text)}
+    .project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}.project-card{padding:26px}.project-head{display:flex;justify-content:space-between;gap:14px}.project-score{font-size:40px;font-weight:800;line-height:1}.project-score small{display:block;color:var(--text-2);font-size:10px;text-align:right}.project-card p{color:var(--text-2);font-size:12px}.quality-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.project-warning{color:var(--amber);font-size:11px;font-weight:800}.project-ok{color:var(--green);font-size:11px;font-weight:800}
+    .skill-table td{min-width:110px}.skill-table td:first-child{min-width:170px}.skill-error{display:block;min-height:16px;color:var(--red);font-size:9px;font-weight:800}
+    .planner-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(330px,.7fr);gap:20px}.energy-card{display:grid;gap:14px}.energy-score{font-size:54px;font-weight:800;line-height:1}.daily-task{display:grid;grid-template-columns:24px minmax(150px,1fr) 130px 85px 85px 36px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .reading-row{display:grid;grid-template-columns:minmax(180px,1.2fr) 130px 120px 90px 90px minmax(160px,1fr) 36px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+    .employ-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}.employ-item{padding:20px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}.employ-item:nth-child(4n){border-right:0}.employ-item h3{font-size:16px}.employ-item p{color:var(--text-2);font-size:11px;min-height:54px}
+    .review-grid{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px}.review-questions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .source-list{columns:2;column-gap:40px;margin:0;padding-left:20px}.source-list li{break-inside:avoid;margin-bottom:10px;color:var(--text-2);font-size:11px}
+    footer{padding:32px 0;border-top:1px solid var(--border);color:var(--text-2);font-size:11px}.footer-inner{display:flex;justify-content:space-between;gap:28px}.footer-inner p{max-width:760px;margin:0}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:300;max-width:360px;padding:12px 16px;border:1px solid var(--border);border-radius:7px;background:var(--card);box-shadow:var(--shadow);color:var(--text);font-size:12px;font-weight:700;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s}.toast.show{transform:translateY(0);opacity:1}
+    @media(max-width:1080px){.hero-grid,.diagnostic-layout,.allocation-grid,.planner-grid{grid-template-columns:1fr}.program-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.project-grid{grid-template-columns:1fr}.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:nth-child(2){border-right:0}.employ-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.employ-item:nth-child(2n){border-right:0}.field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.container{width:min(100% - 32px,1240px)}.header-inner{min-height:64px}.brand{max-width:130px;line-height:1.2}.btn-label,.edit-status{display:none!important}.btn{padding:8px 10px}main{padding-bottom:48px}section{margin-top:54px}.hero{padding:50px 0 20px}h1{font-size:48px;overflow-wrap:anywhere}.hero-progress{grid-template-columns:1fr}.gauge{margin-inline:auto}.section-head{display:block}.card{padding:20px}.program-grid,.grid-2,.grid-3,.grid-4,.field-grid,.employ-grid,.review-grid,.review-questions{grid-template-columns:1fr}.metric,.employ-item{border-right:0}.field.span-2,.field.full{grid-column:auto}details.week summary{grid-template-columns:58px minmax(0,1fr) 28px}.week-progress{display:none}.daily-task,.reading-row{grid-template-columns:24px minmax(0,1fr) 36px}.daily-task>:nth-child(3),.daily-task>:nth-child(4),.daily-task>:nth-child(5),.reading-row>:nth-child(3),.reading-row>:nth-child(4),.reading-row>:nth-child(5),.reading-row>:nth-child(6){grid-column:2}.source-list{columns:1}.footer-inner{display:block}.footer-inner p+p{margin-top:12px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+    @media print{@page{size:A4;margin:1.4cm}:root,:root[data-theme="dark"]{--bg:#fff;--card:#fff;--text:#000;--text-2:#333;--border:#bbb;--accent:#174ea6;--shadow:none}body{background:#fff;color:#000;font-size:9pt}.site-header,.no-print,.btn,.tabs,.toast{display:none!important}.container{width:100%}main{padding:0}section{margin-top:28px}.hero{padding:0}h1{font-size:28pt}.card,details.week,.project-card{box-shadow:none;break-inside:avoid}.tab-content{display:block!important}details.week .week-body{display:block!important}.table-responsive{overflow:visible}a{color:#000;text-decoration:none}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">Trainer de Carrera Tech</div>
+      <div class="header-actions">
+        <span class="edit-status">Edición activa</span>
+        <button class="btn" id="editBtn" type="button" aria-label="Activar edición"><span>✎</span><span class="btn-label">Editar textos</span></button>
+        <button class="btn" id="themeBtn" type="button" aria-label="Cambiar tema"><span>◐</span><span class="btn-label">Tema</span></button>
+        <button class="btn" id="printBtn" type="button"><span>▣</span><span class="btn-label">Imprimir / PDF</span></button>
+        <button class="btn" id="exportBtn" type="button"><span>↓</span><span class="btn-label">Exportar</span></button>
+        <button class="btn" id="importBtn" type="button"><span>↑</span><span class="btn-label">Importar</span></button>
+        <input id="importFile" type="file" accept="application/json" hidden>
+        <button class="btn btn-danger" id="resetBtn" type="button"><span>↺</span><span class="btn-label">Reiniciar</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">Centro unificado · <span data-current-date></span></div>
+          <h1 class="editable" data-edit-key="hero.title">Tu entrenamiento profesional, en un solo sistema</h1>
+          <p class="hero-copy editable" data-edit-key="hero.copy">Integra AnyoneAI, Futura, recursos puntuales de Coursera, un portafolio exigente y el cuidado de tu energía sin perder de vista la ruta hacia Decision Scientist / Data Scientist aplicado.</p>
+          <div class="hero-meta">
+            <span class="pill">Prioridad 1: AnyoneAI</span>
+            <span class="pill">Prioridad 2: Futura</span>
+            <span class="pill">Capacidad: <strong data-capacity-label>10 h/día</strong></span>
+            <span class="pill">Ciclo: 23 semanas</span>
+            <span class="pill">Estado: Sprint 2</span>
+          </div>
+        </div>
+        <div class="hero-progress">
+          <div class="gauge" aria-label="Progreso general">
+            <svg viewBox="0 0 180 180" aria-hidden="true">
+              <circle class="gauge-bg" cx="90" cy="90" r="74"></circle>
+              <circle class="gauge-fg" data-global-gauge cx="90" cy="90" r="74" stroke-dasharray="465" stroke-dashoffset="465"></circle>
+            </svg>
+            <div class="gauge-center"><span class="gauge-value" data-global-progress>0</span><span class="gauge-label">Progreso / 100</span></div>
+          </div>
+          <div class="hero-stat-list">
+            <div class="hero-stat"><span>Semana operativa</span><strong data-current-week>Semana 1</strong></div>
+            <div class="hero-stat"><span>Horas registradas</span><strong><span data-total-hours>0</span> h</strong></div>
+            <div class="hero-stat"><span>Proyectos activos</span><strong><span data-active-projects>0</span></strong></div>
+            <div class="hero-stat"><span>Evidencias de skills</span><strong><span data-demonstrated-skills>0</span></strong></div>
+            <span class="bar-track"><span class="bar-fill" data-global-bar></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="diagnostico">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">01 · Diagnóstico</div><h2 class="editable" data-edit-key="diagnostic.title">La brecha no es aprender más algoritmos</h2></div>
+          <p class="editable" data-edit-key="diagnostic.copy">Tu cuello de botella es transformar conocimiento parcial en rigor, reproducibilidad, criterio empresarial y comunicación profesional.</p>
+        </div>
+        <div class="card diagnostic-layout">
+          <div>
+            <div class="indicator-list" id="indicatorList"></div>
+            <p class="note">Indicadores orientativos basados en tus respuestas y evidencias descritas. No son una evaluación científica.</p>
+          </div>
+          <div class="radar-wrap"><canvas id="radarChart" aria-label="Radar del diagnóstico profesional" role="img"></canvas></div>
+        </div>
+        <div class="alert"><strong>Regla de evidencia:</strong> completar cursos y registrar horas no aumenta por sí solo el nivel. Una habilidad sube cuando existe un entregable auditable, una defensa o un uso real.</div>
+      </div>
+    </section>
+
+    <section id="top5">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">02 · Top 5</div><h2 class="editable" data-edit-key="routes.title">Rutas con score superior a 60/100</h2></div>
+          <p class="editable" data-edit-key="routes.copy">Se conserva la decisión del Arquitecto de Carrera: una ruta principal para empleo, dos adyacentes y una pista empresarial ligera.</p>
+        </div>
+        <div class="grid-3" id="routeCards">
+          <article class="card route-card"><span class="badge">Principal · 84</span><h3 class="editable" data-edit-key="route.1.title">Decision Scientist / Data Scientist aplicado</h3><p class="editable" data-edit-key="route.1.copy">Estadística, validación, decisiones comerciales y modelos tabulares con evaluación rigurosa.</p></article>
+          <article class="card route-card"><span class="badge">Adyacente · 80</span><h3 class="editable" data-edit-key="route.2.title">Data Scientist de riesgo y CRM</h3><p class="editable" data-edit-key="route.2.copy">Aprovecha tu experiencia bancaria y conecta directamente con Home Credit.</p></article>
+          <article class="card route-card"><span class="badge">Adyacente · 78</span><h3 class="editable" data-edit-key="route.3.title">Analytics Engineer</h3><p class="editable" data-edit-key="route.3.copy">SQL, modelado, calidad y BI como alternativa de entrada rápida y puente a ingeniería.</p></article>
+          <article class="card route-card"><span class="badge">Progresión · 72</span><h3 class="editable" data-edit-key="route.4.title">Machine Learning Engineer junior</h3><p class="editable" data-edit-key="route.4.copy">Alto techo profesional; AnyoneAI y el proyecto final construyen la transición sin convertirla en el único objetivo inmediato.</p></article>
+          <article class="card route-card"><span class="badge">Pista empresarial · 65</span><h3 class="editable" data-edit-key="route.5.title">Reporting y calidad de datos</h3><p class="editable" data-edit-key="route.5.copy">Servicio acotado para aprender discovery y ventas después de consolidar evidencia técnica.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="seleccion">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">03 · Selección estratégica</div><h2 class="editable" data-edit-key="strategy.title">Una ruta profesional, cuatro fuentes de aprendizaje</h2></div>
+          <p class="editable" data-edit-key="strategy.copy">Los programas son medios. La evidencia de portafolio y el desempeño profesional son el resultado.</p>
+        </div>
+        <div class="card grid-4">
+          <div class="strategy-item"><span class="badge">Prioridad 1</span><h3 class="editable" data-edit-key="strategy.anyone.title">AnyoneAI</h3><p class="editable" data-edit-key="strategy.anyone.copy">Columna vertebral de ingeniería de ML y proyecto final.</p><ul><li class="editable" data-edit-key="strategy.anyone.rule1">28 h/semana de referencia</li><li class="editable" data-edit-key="strategy.anyone.rule2">No duplicar contenidos</li><li class="editable" data-edit-key="strategy.anyone.rule3">Entregables primero</li></ul></div>
+          <div class="strategy-item"><span class="badge">Prioridad 2</span><h3 class="editable" data-edit-key="strategy.futura.title">Futura</h3><p class="editable" data-edit-key="strategy.futura.copy">Profundidad progresiva en Data Science hasta diciembre.</p><ul><li class="editable" data-edit-key="strategy.futura.rule1">20 h/semana</li><li class="editable" data-edit-key="strategy.futura.rule2">Conectar tareas a Home Credit</li><li class="editable" data-edit-key="strategy.futura.rule3">Consolidar estadística y EDA</li></ul></div>
+          <div class="strategy-item"><span class="badge">Cobertura de brechas</span><h3 class="editable" data-edit-key="strategy.coursera.title">Coursera</h3><p class="editable" data-edit-key="strategy.coursera.copy">SQL Server, Power BI, inglés, negocio y comunicación.</p><ul><li class="editable" data-edit-key="strategy.coursera.rule1">7 h/semana máximo</li><li class="editable" data-edit-key="strategy.coursera.rule2">Cursos en inglés</li><li class="editable" data-edit-key="strategy.coursera.rule3">Certificados con señal laboral</li></ul></div>
+          <div class="strategy-item"><span class="badge">Just in time</span><h3 class="editable" data-edit-key="strategy.udemy.title">Udemy</h3><p class="editable" data-edit-key="strategy.udemy.copy">Consultar módulos concretos cuando un proyecto los exija.</p><ul><li class="editable" data-edit-key="strategy.udemy.rule1">No seguir bootcamps completos ahora</li><li class="editable" data-edit-key="strategy.udemy.rule2">Priorizar probabilidad y estadística</li><li class="editable" data-edit-key="strategy.udemy.rule3">MLOps después de Sprint 4</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gaps">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">04 · Gap analysis</div><h2 class="editable" data-edit-key="gaps.title">Habilidades que mueven el resultado</h2></div>
+          <p class="editable" data-edit-key="gaps.copy">Las prioridades se mantienen; el nuevo roadmap decide qué recurso cubre cada brecha y qué evidencia debe producir.</p>
+        </div>
+        <div class="card table-responsive">
+          <table aria-label="Brechas prioritarias">
+            <thead><tr><th>Habilidad</th><th>Actual → objetivo</th><th>Proveedor principal</th><th>Evidencia exigida</th><th>Prioridad</th></tr></thead>
+            <tbody>
+              <tr><td class="editable" data-edit-key="gap.1.skill">Rigor estadístico y validación</td><td><div class="gap-bar"><span class="gap-target" style="width:75%"></span><span class="gap-current" style="width:35%"></span></div><small>1 → 3</small></td><td class="editable" data-edit-key="gap.1.source">Futura + Home Credit</td><td class="editable" data-edit-key="gap.1.evidence">Esquema CV correcto, intervalos y análisis de error</td><td>Crítica</td></tr>
+              <tr><td class="editable" data-edit-key="gap.2.skill">Pipelines y calidad de datos</td><td><div class="gap-bar"><span class="gap-target" style="width:75%"></span><span class="gap-current" style="width:30%"></span></div><small>1 → 3</small></td><td class="editable" data-edit-key="gap.2.source">AnyoneAI Sprint 1 + proyecto</td><td class="editable" data-edit-key="gap.2.evidence">Pipeline reproducible con pruebas de datos</td><td>Crítica</td></tr>
+              <tr><td class="editable" data-edit-key="gap.3.skill">Deployment y MLOps básico</td><td><div class="gap-bar"><span class="gap-target" style="width:50%"></span><span class="gap-current" style="width:0"></span></div><small>0 → 2</small></td><td class="editable" data-edit-key="gap.3.source">AnyoneAI Sprint 4</td><td class="editable" data-edit-key="gap.3.evidence">API, contenedor, CI y monitoreo mínimo</td><td>Alta</td></tr>
+              <tr><td class="editable" data-edit-key="gap.4.skill">SQL y Power BI profesional</td><td><div class="gap-bar"><span class="gap-target" style="width:75%"></span><span class="gap-current" style="width:45%"></span></div><small>2 → 3</small></td><td class="editable" data-edit-key="gap.4.source">Microsoft en Coursera</td><td class="editable" data-edit-key="gap.4.evidence">Modelo analítico, DAX, dashboard y narrativa</td><td>Alta</td></tr>
+              <tr><td class="editable" data-edit-key="gap.5.skill">Inglés oral técnico</td><td><div class="gap-bar"><span class="gap-target" style="width:75%"></span><span class="gap-current" style="width:30%"></span></div><small>1 → 3</small></td><td class="editable" data-edit-key="gap.5.source">Todos los cursos + práctica</td><td class="editable" data-edit-key="gap.5.evidence">Una defensa grabada semanal y dos simulaciones</td><td>Alta</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">05 · Roadmap editable</div><h2 class="editable" data-edit-key="roadmap.title">23 semanas: prioridad, integración y evidencia</h2></div>
+          <p class="editable" data-edit-key="roadmap.copy">El ciclo profesional principal dura cuatro meses; diciembre cierra Futura, documentación y salida al mercado. Cada semana puede editarse, replanificarse o eliminarse.</p>
+        </div>
+        <div class="card">
+          <div class="allocation-grid">
+            <div>
+              <div class="field-grid" style="margin-bottom:18px">
+                <div class="field"><label for="dailyCapacity">Capacidad diaria</label><input class="control" id="dailyCapacity" type="number" min="1" max="16" step=".5"></div>
+                <div class="field"><label for="studyDays">Días por semana</label><input class="control" id="studyDays" type="number" min="1" max="7" step="1"></div>
+                <div class="field"><label>Capacidad semanal</label><input class="control" id="weeklyCapacity" readonly></div>
+                <div class="field"><label>Regla de expansión</label><input class="control" value="Solo con sueño ≥7 h" readonly></div>
+              </div>
+              <h3>Distribución semanal de referencia</h3>
+              <div class="hour-stack" id="hourStack" aria-label="Distribución semanal de horas"></div>
+              <p class="note">AnyoneAI 40% · Futura 29% · Portafolio 15% · Coursera e inglés 10% · Revisión, lectura y carrera 6%.</p>
+              <div class="alert"><strong>Límite operativo:</strong> 10 horas disponibles no equivalen a 10 horas de concentración intensa. Usa bloques, pausas y una meta de sueño mínima; si la energía cae dos días seguidos, reduce alcance antes de ampliar horas.</div>
+            </div>
+            <div class="allocation-chart"><canvas id="allocationChart" aria-label="Distribución de horas de estudio" role="img"></canvas></div>
+          </div>
+        </div>
+        <div class="program-grid" id="programGrid" style="margin-top:20px"></div>
+        <div class="action-row no-print"><button class="btn btn-primary" id="addProgramBtn" type="button">Añadir fuente de aprendizaje</button></div>
+        <div class="card" style="margin-top:20px">
+          <div class="timeline" id="timeline"></div>
+          <div class="action-row no-print">
+            <button class="btn btn-primary" id="addWeekBtn" type="button">Añadir semana</button>
+            <span class="inline-total">Planificadas: <strong id="roadmapPlanned">0 h</strong> · Registradas: <strong id="roadmapActual">0 h</strong></span>
+          </div>
+        </div>
+        <div class="week-list" id="weekList"></div>
+      </div>
+    </section>
+
+    <section id="proyectos">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">06 · Proyectos</div><h2 class="editable" data-edit-key="projects.title">Un proyecto principal; los anteriores, como secundarios</h2></div>
+          <p class="editable" data-edit-key="projects.copy">Home Credit Default Risk concentra estadística, negocio, modelos tabulares e interpretabilidad. Los proyectos recomendados por el Arquitecto se conservan en una pestaña aparte.</p>
+        </div>
+        <div class="card" data-tab-scope>
+          <div class="tabs">
+            <button class="tab-btn is-active" type="button" data-tab="projects-main">Proyecto principal</button>
+            <button class="tab-btn" type="button" data-tab="projects-secondary">Proyectos secundarios</button>
+          </div>
+          <div class="tab-content is-active" data-tabid="projects-main"><div class="project-grid" id="mainProjects"></div></div>
+          <div class="tab-content" data-tabid="projects-secondary"><div class="project-grid" id="secondaryProjects"></div></div>
+          <div class="action-row no-print"><button class="btn btn-primary" id="addProjectBtn" type="button">Añadir proyecto a esta pestaña</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tracker">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">07 · Tracker</div><h2 class="editable" data-edit-key="tracker.title">Habilidades con validación por evidencia</h2></div>
+          <p class="editable" data-edit-key="tracker.copy">Todas las filas son editables. Para subir de nivel debes registrar una evidencia de al menos 12 caracteres.</p>
+        </div>
+        <div class="card table-responsive">
+          <table class="skill-table" aria-label="Tracker de habilidades">
+            <thead><tr><th>Habilidad</th><th>Categoría</th><th>Objetivo</th><th>Nivel</th><th>Horas</th><th>Evidencia</th><th>Estado</th><th>Próxima acción</th><th>Acción</th></tr></thead>
+            <tbody id="skillBody"></tbody>
+          </table>
+          <div class="action-row no-print"><button class="btn btn-primary" id="addSkillBtn" type="button">Añadir habilidad</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan-diario">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">08 · Plan diario y energía</div><h2 class="editable" data-edit-key="daily.title">La disciplina académica empieza fuera del escritorio</h2></div>
+          <p class="editable" data-edit-key="daily.copy">Planifica tareas, registra horas reales y protege sueño, ejercicio y atención. El objetivo es rendimiento sostenible, no acumular tiempo sentado.</p>
+        </div>
+        <div class="planner-grid">
+          <div class="card">
+            <div class="field-grid">
+              <div class="field"><label for="plannerDate">Fecha</label><input class="control" id="plannerDate" type="date"></div>
+              <div class="field"><label>Horas planificadas</label><input class="control" id="dailyPlanned" readonly></div>
+              <div class="field"><label>Horas reales</label><input class="control" id="dailyActual" readonly></div>
+              <div class="field"><label>Cumplimiento</label><input class="control" id="dailyCompletion" readonly></div>
+            </div>
+            <div id="dailyTasks" style="margin-top:18px"></div>
+            <div class="action-row no-print"><button class="btn btn-primary" id="addDailyTaskBtn" type="button">Añadir tarea</button></div>
+          </div>
+          <div class="card energy-card">
+            <div><span class="eyebrow">Energía del día</span><div class="energy-score"><span id="energyScore">0</span><small style="font-size:13px;color:var(--text-2)"> / 100</small></div></div>
+            <div class="field"><label for="sleepHours">Sueño (horas)</label><input class="control" id="sleepHours" type="number" min="0" max="14" step=".5"></div>
+            <div class="field"><label for="exerciseMinutes">Ejercicio (minutos)</label><input class="control" id="exerciseMinutes" type="number" min="0" max="300" step="5"></div>
+            <div class="field"><label for="focusScore">Calidad de enfoque (1–5)</label><input class="control" id="focusScore" type="number" min="1" max="5" step="1"></div>
+            <label class="check-row"><input id="badHabitFree" type="checkbox"> Día libre del mal hábito que estás reduciendo</label>
+            <div class="field"><label for="energyNotes">Notas de energía</label><textarea class="control" id="energyNotes"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lecturas">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">09 · Tracker de lectura</div><h2 class="editable" data-edit-key="reading.title">Lecturas que alimentan proyectos y criterio</h2></div>
+          <p class="editable" data-edit-key="reading.copy">Registra libros, artículos, documentación o capítulos técnicos. Una lectura termina con notas o una aplicación, no solo con porcentaje.</p>
+        </div>
+        <div class="card">
+          <div id="readingList"></div>
+          <div class="action-row no-print"><button class="btn btn-primary" id="addReadingBtn" type="button">Añadir lectura</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="empleabilidad">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">10 · Empleabilidad</div><h2 class="editable" data-edit-key="employ.title">Certificados subordinados a evidencia profesional</h2></div>
+          <p class="editable" data-edit-key="employ.copy">Microsoft SQL Server y Power BI complementan tu perfil. Los certificados IBM son opcionales y solo entran si no desplazan AnyoneAI, Futura o portafolio.</p>
+        </div>
+        <div class="card">
+          <div class="employ-grid" id="employGrid"></div>
+          <div class="action-row"><button class="btn btn-small no-print" id="addEmployBtn" type="button">Añadir objetivo</button><span class="bar-track" style="flex:1"><span class="bar-fill" id="employBar"></span></span><strong id="employPercent">0%</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="revision">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">11 · Revisión semanal</div><h2 class="editable" data-edit-key="review.title">Reajusta con evidencia, no con culpa</h2></div>
+          <p class="editable" data-edit-key="review.copy">Selecciona una semana. El formulario y todos los trackers se guardan automáticamente en este navegador.</p>
+        </div>
+        <div class="card review-grid">
+          <div>
+            <div class="field"><label for="reviewWeek">Semana</label><select class="control" id="reviewWeek"></select></div>
+            <p class="note">Compara horas, entregables, energía y utilidad profesional. Si algo sobra, elimínalo.</p>
+          </div>
+          <div class="review-questions">
+            <div class="field"><label>Entregable terminado</label><textarea class="control review-input" data-review-field="achievement"></textarea></div>
+            <div class="field"><label>Evidencia de aprendizaje</label><textarea class="control review-input" data-review-field="evidence"></textarea></div>
+            <div class="field"><label>Error o bloqueo</label><textarea class="control review-input" data-review-field="blocker"></textarea></div>
+            <div class="field"><label>Habilidad que mejoró</label><textarea class="control review-input" data-review-field="skill"></textarea></div>
+            <div class="field"><label>Cambio para la próxima semana</label><textarea class="control review-input" data-review-field="change"></textarea></div>
+            <div class="field"><label>Decisión sobre carga y energía</label><textarea class="control review-input" data-review-field="energy"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="recursos">
+      <div class="container">
+        <div class="section-head">
+          <div><div class="eyebrow">12 · Recursos y reglas</div><h2>Biblioteca, no lista infinita de pendientes</h2></div>
+          <p>Los enlaces abren fuentes de estudio o proyecto. Elige módulos concretos cuando una evidencia los requiera.</p>
+        </div>
+        <div class="card">
+          <ol class="source-list">
+            <li><a href="https://www.kaggle.com/competitions/home-credit-default-risk/data" target="_blank" rel="noopener">Home Credit Default Risk</a>: datos y descripción del proyecto principal.</li>
+            <li><a href="https://scikit-learn.org/stable/common_pitfalls.html" target="_blank" rel="noopener">scikit-learn — Common pitfalls</a>: leakage y preprocessing consistente.</li>
+            <li><a href="https://scikit-learn.org/stable/modules/cross_validation.html" target="_blank" rel="noopener">scikit-learn — Cross-validation</a>: evaluación y selección de esquemas.</li>
+            <li><a href="https://scikit-learn.org/stable/inspection.html" target="_blank" rel="noopener">scikit-learn — Inspection</a>: interpretación y diagnóstico.</li>
+            <li><a href="https://fastapi.tiangolo.com/tutorial/" target="_blank" rel="noopener">FastAPI Tutorial</a>: API, contratos y validación.</li>
+            <li><a href="https://docs.docker.com/guides/python/" target="_blank" rel="noopener">Docker Python Guide</a>: reproducibilidad y contenedores.</li>
+            <li><a href="https://docs.github.com/en/actions/tutorials/build-and-test-code/python" target="_blank" rel="noopener">GitHub Actions para Python</a>: pruebas y CI.</li>
+            <li><a href="https://mlflow.org/docs/latest/tracking" target="_blank" rel="noopener">MLflow Tracking</a>: métricas, parámetros y artefactos.</li>
+          </ol>
+          <div class="alert"><strong>Orden de decisión:</strong> <span class="editable" data-edit-key="resources.rule">1) entrega de AnyoneAI, 2) continuidad de Futura, 3) Home Credit, 4) brecha puntual de Coursera, 5) módulo puntual de Udemy. Si dos cursos enseñan lo mismo, conserva uno y produce evidencia con el tiempo liberado.</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <p><strong>Trainer de Carrera Tech.</strong> Centro local editable: aprendizaje → proyectos → evidencias → energía → revisión → reajuste.</p>
+      <p><span data-current-date></span><br>Los datos se guardan en este navegador. Exporta una copia semanal; el archivo JSON permite restaurar todo el sistema.</p>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (function(){
+    "use strict";
+    var STORAGE_KEY="tech-career-trainer-v1";
+    var THEME_KEY="tech-career-trainer-theme";
+    var qualityRubric=[
+      {id:"problem",label:"Problema y decisión",weight:10},{id:"data",label:"Datos y calidad",weight:10},
+      {id:"eda",label:"EDA y estadística",weight:15},{id:"validation",label:"Baseline y validación",weight:15},
+      {id:"model",label:"Modelado y error",weight:15},{id:"engineering",label:"Ingeniería y reproducibilidad",weight:15},
+      {id:"communication",label:"Comunicación y documentación",weight:10},{id:"utility",label:"Utilidad e impacto",weight:10}
+    ];
+    var homeCreditTasks=[
+      "Comprensión del problema de negocio, usuario de la decisión y ROC-AUC",
+      "Exploración de tablas y diagrama del esquema relacional",
+      "Auditoría de calidad, faltantes, duplicados, tipos y leakage",
+      "Integración reproducible de Bureau, Previous Application, POS, Installments y Credit Card",
+      "EDA guiado por hipótesis y segmentos de riesgo",
+      "Investigación bibliográfica y revisión crítica de soluciones Kaggle",
+      "Ingeniería de características: agregaciones, ratios y variables temporales",
+      "WOE/IV solo donde aporte interpretación y sin contaminar validación",
+      "Baseline Dummy y Logistic Regression con pipeline",
+      "Random Forest, XGBoost, LightGBM y CatBoost bajo el mismo esquema de validación",
+      "Validación cruzada estratificada y evaluación ROC-AUC con intervalos",
+      "Calibración, curvas de ganancia, KS y análisis de umbrales de negocio",
+      "Feature Importance y SHAP con comprobaciones de estabilidad",
+      "Optimización de hiperparámetros con presupuesto y trazabilidad",
+      "Ensamble final solo si mejora de forma robusta",
+      "Submission reproducible y registro de experimentos",
+      "Análisis de error, fairness básica y limitaciones",
+      "Dashboard, reporte técnico y presentación ejecutiva",
+      "Documentación, entorno reproducible, entrega y defensa grabada"
+    ];
+    var weeks=[
+      ["27 jul–2 ago","Sprint 2 + Futura","Evaluación reproducible","Cerrar la semana 2 de Sprint 2 y preparar Futura.","Métricas, partición, baseline y bitácora.",["Auditar el esquema de validación de Sprint 2","Crear baseline reproducible","Configurar calendario y repositorio de Futura"],70],
+      ["3–9 ago","Sprint 2","Model training & evaluation","Completar Sprint 2 con análisis de error.","CV, leakage, métricas y defensa.",["Cerrar entregables de Sprint 2","Defender la elección de métrica en inglés","Aplicar el esquema a Home Credit"],70],
+      ["10–16 ago","Sprint 3","Deep Learning foundations","Construir intuición y una implementación mínima.","Backprop, PyTorch/TensorFlow y experimentos.",["Completar semana 1 de Sprint 3","Futura: fundamentos Python","Registrar un experimento reproducible"],70],
+      ["17–23 ago","Sprint 3","Representaciones y redes","Comparar DL con un baseline clásico.","Arquitecturas, regularización y visualización.",["Completar semana 2 de Sprint 3","Futura: visualización y POO","Grabar explicación técnica de 5 minutos"],70],
+      ["24–30 ago","Sprint 3","GenAI con criterio","Cerrar Sprint 3 sin desviar la ruta principal.","Embeddings, evaluación y límites.",["Completar semana 3 de Sprint 3","Futura: scraping y APIs","Escribir memo: cuándo no usar GenAI"],70],
+      ["31 ago–6 sep","Sprint 4","Servicio de modelo","Exponer un modelo con contrato claro.","FastAPI, artefactos y manejo de errores.",["API mínima con validación","Futura: estadística descriptiva/inferencial","Pruebas de contrato"],70],
+      ["7–13 sep","Sprint 4","Contenedores y pruebas","Hacer reproducible el servicio.","Docker, pytest y pruebas de datos.",["Contenerizar servicio","Futura: reducción y clustering","Ejecutar test suite limpia"],70],
+      ["14–20 sep","Sprint 4","CI y monitoreo","Cerrar Sprint 4 con una ruta operable.","CI, logging, drift y rollback.",["Pipeline CI","Monitoreo mínimo","Futura: procesamiento de datos"],70],
+      ["21–27 sep","Final AnyoneAI","Discovery de proyecto final","Definir alcance, usuario y criterio de aceptación.","Problem framing y arquitectura.",["Aprobar brief del proyecto final","Plan de cinco semanas","Home Credit: integración relacional"],70],
+      ["28 sep–4 oct","Final AnyoneAI","Datos y features","Construir el pipeline de datos del proyecto final.","Calidad, features y pruebas.",["Pipeline del proyecto final","Futura: feature engineering y WOE","Home Credit: auditoría de calidad"],70],
+      ["5–11 oct","Final AnyoneAI","Baseline y EDA","Establecer referencia y comprender errores.","EDA, baseline y validación.",["Baseline auditable","Futura: EDA","Home Credit: EDA por hipótesis"],70],
+      ["12–18 oct","Final AnyoneAI","Modelado comparativo","Comparar modelos con el mismo protocolo.","Regresión, clasificación y trazabilidad.",["Experimentos comparables","Futura: regresión y clasificación","Memo de resultados"],70],
+      ["19–25 oct","Final AnyoneAI","Entrega y defensa","Cerrar el proyecto final con calidad profesional.","Documentación, demo y defensa.",["Entrega final AnyoneAI","Defensa grabada en inglés","Retrospectiva técnica"],70],
+      ["26 oct–1 nov","Home Credit","Baseline bancario","Convertir Home Credit en un proyecto de riesgo defendible.","Logística, LightGBM y CV.",["Pipeline baseline","Futura: segmentación y ensambles","Revisión externa de validación"],70],
+      ["2–8 nov","Home Credit","Interpretabilidad y error","Explicar el modelo y sus fallos.","SHAP, calibración y segmentos.",["Comparar árboles","Análisis SHAP","Futura: text mining / DL"],70],
+      ["9–15 nov","Home Credit","Optimización responsable","Cerrar modelo, umbral y análisis de impacto.","Tuning, ensemble y decisión.",["Tuning trazable","Curvas de ganancia y umbral","Documento de limitaciones"],70],
+      ["16–22 nov","Home Credit","Comunicación ejecutiva","Transformar resultados en una decisión comprensible.","Power BI, reporte y storytelling.",["Dashboard ejecutivo","Reporte técnico","Iniciar Microsoft Power BI"],70],
+      ["23–29 nov","Home Credit","Operación y publicación","Publicar un proyecto reproducible y defendible.","API, Docker, CI y README.",["Servicio o batch reproducible","README y video demo","Solicitar dos revisiones externas"],70],
+      ["30 nov–6 dic","Mercado + Futura","Paquete profesional","Convertir evidencia en CV, GitHub e historias de entrevista.","CV, STAR, inglés y casos.",["CV dirigido","Dos simulaciones en inglés","Cerrar pendientes Futura"],70],
+      ["7–13 dic","Complementarias","SQL Server y Power BI","Cubrir brechas sin duplicar fundamentos.","SQL analítico, modelo tabular y DAX.",["Proyecto SQL pequeño","Dashboard Power BI","Una publicación técnica"],70],
+      ["14–20 dic","Defensa","Portfolio review","Auditar los proyectos con la rúbrica 75/100.","Revisión, pruebas y comunicación.",["Evaluar los tres proyectos","Corregir brechas críticas","Presentación de portafolio"],70],
+      ["21–27 dic","Salida al mercado","Postulaciones y networking","Ejecutar una campaña dirigida y aprender del mercado.","Vacantes, mensajes y entrevistas.",["15 postulaciones dirigidas","5 conversaciones profesionales","Registrar tasa de respuesta"],70],
+      ["28–31 dic","Cierre Futura","Retrospectiva y plan siguiente","Cerrar Futura y decidir el siguiente trimestre.","Evidencias, métricas y decisiones.",["Entrega final Futura","Retrospectiva completa","Plan de 90 días"],40]
+    ].map(function(w,i){return{id:"week-"+(i+1),number:i+1,dates:w[0],phase:w[1],title:w[2],goal:w[3],focus:w[4],tasks:w[5].map(function(t,j){return{id:"w"+(i+1)+"t"+j,text:t,done:false}}),planned:w[6],actual:0,status:"not_started",evidence:"",blockers:"",notes:""}});
+    var programs=[
+      {id:"anyone",name:"AnyoneAI · ML Engineer",priority:"Prioridad 1",summary:"Columna vertebral. Sprint 2 comenzó el 20 de julio.",modules:["Python and Math Refresher (opcional)","Sprint 1 · Data y pipelines","Sprint 2 · ML foundations, training y evaluation","Sprint 3 · Deep Learning y GenAI","Sprint 4 · Deployment","Final Project · 5 semanas"],done:[false,true,false,false,false,false]},
+      {id:"futura",name:"Futura · Data Science",priority:"Prioridad 2",summary:"1 de agosto a 31 de diciembre. Refuerza estadística, EDA y modelado.",modules:["Python, visualización y POO","Scraping y APIs","Estadística descriptiva e inferencial","Reducción, clustering y procesamiento","Feature engineering, WOE y EDA","Regresión, clasificación y segmentación","Ensambles, text mining y deep learning"],done:[false,false,false,false,false,false,false]},
+      {id:"coursera",name:"Coursera Plus",priority:"Brechas",summary:"Biblioteca en inglés. Elegir cursos por evidencia y señal laboral.",modules:["Microsoft SQL Server Professional Certificate","Microsoft Power BI Data Analyst Professional Certificate","Problem framing y storytelling","Inglés oral técnico","Gestión, ventas y negocio","IBM AI / ML certificates (opcionales)"],done:[false,false,false,false,false,false]},
+      {id:"udemy",name:"Udemy",priority:"Just in time",summary:"No es otra especialización activa. Consultar módulos puntuales.",modules:["Probabilidad y estadística aplicada","MLOps después de Sprint 4","PyTorch o TensorFlow como referencia","GenAI, RAG, agentes y LLMOps después del ciclo principal"],done:[false,false,false,false]}
+    ];
+    var projects=[
+      {id:"home-credit",category:"main",title:"Home Credit Default Risk",summary:"Sistema de riesgo de crédito con validación robusta, interpretabilidad y traducción a decisión de negocio.",stack:"Python, SQL, pandas, scikit-learn, LightGBM, CatBoost, SHAP, MLflow, Power BI, FastAPI/Docker opcional",link:"https://www.kaggle.com/competitions/home-credit-default-risk/data",status:"active",tasks:homeCreditTasks.map(function(t,i){return{id:"hc"+i,text:t,done:false}}),quality:{},notes:""},
+      {id:"recommender",category:"secondary",title:"Reconstrucción del recomendador",summary:"Reformular el recomendador de películas como un sistema evaluado offline con baseline, splits temporales y análisis de utilidad.",stack:"Python, SQL, pandas, scikit-learn, implicit/similarity, MLflow local",link:"",status:"planned",tasks:["Definir decisión y usuario","Diseñar split temporal","Crear baseline","Evaluar ranking y cobertura","Analizar error y cold start","Documentar y defender"].map(function(t,i){return{id:"rec"+i,text:t,done:false}}),quality:{},notes:""},
+      {id:"ml-service",category:"secondary",title:"Scoring end-to-end operable",summary:"Transformar un modelo tabular en un servicio reproducible con contratos, pruebas, contenedor, CI y monitoreo básico.",stack:"Python, FastAPI, pytest, Docker, GitHub Actions, MLflow",link:"",status:"planned",tasks:["Contrato de inferencia","Pruebas unitarias y de datos","API y errores","Docker","CI","Monitoreo mínimo"].map(function(t,i){return{id:"svc"+i,text:t,done:false}}),quality:{},notes:""},
+      {id:"decision-capstone",category:"secondary",title:"Capstone de decisión comercial",summary:"Priorizar una decisión de retención, demanda o inventario con dataset legal, stakeholder plausible y métrica empresarial.",stack:"SQL, Python, scikit-learn, Power BI, Docker opcional",link:"",status:"planned",tasks:["Descubrir problema","Definir métrica","Auditar datos","Baseline","Modelo y error","Dashboard y memo"].map(function(t,i){return{id:"cap"+i,text:t,done:false}}),quality:{},notes:""}
+    ];
+    var skills=[
+      ["Python profesional","Ingeniería",3,2,"Modularizar P1 y añadir typing/pruebas"],["SQL analítico","Fundamentos",3,2,"Resolver joins, CTE y ventanas"],["Estadística aplicada","Rigor",3,1,"Validación, incertidumbre y pruebas"],["EDA guiado por hipótesis","Rigor",3,2,"EDA de Home Credit con preguntas"],["Feature engineering","ML",3,2,"Features estables y sin leakage"],["Validación y leakage","Rigor",3,1,"Pipeline y CV auditables"],["Análisis de error","Rigor",3,1,"Segmentos, calibración y umbrales"],["Modelos tabulares","ML",3,2,"Logística, LightGBM y CatBoost"],["Deep Learning","ML",2,0,"Sprint 3 con baseline clásico"],["GenAI aplicada","IA",2,0,"Evaluación y memo de límites"],["APIs con FastAPI","Producción",2,0,"Contrato y pruebas en Sprint 4"],["Testing","Producción",2,0,"pytest y pruebas de datos"],["Docker","Producción",2,0,"Contenedor reproducible"],["CI/CD","Producción",2,0,"GitHub Actions"],["MLflow y experimentos","MLOps",2,0,"Tracking local"],["Power BI y DAX","BI",3,2,"Dashboard Home Credit"],["Problem framing","Negocio",3,1,"Brief y métrica de decisión"],["Storytelling","Comunicación",3,1,"Memo ejecutivo"],["Inglés oral técnico","Inglés",3,1,"Una grabación semanal"],["Gestión de proyectos","Gestión",2,1,"Plan, riesgo y retrospectiva"],["Ventas y discovery","Negocio",2,1,"Cinco conversaciones profesionales"]
+    ].map(function(s,i){return{id:"skill-"+i,name:s[0],category:s[1],target:s[2],level:s[3],hours:0,evidence:"",status:"pending",next:s[4],lastSavedLevel:s[3]}});
+    var employ=[
+      {id:"cv",title:"CV dirigido",description:"Una versión DS/Decision Science y otra Analytics Engineer.",done:false,evidence:""},
+      {id:"github",title:"GitHub curado",description:"Tres proyectos fijados, README y reproducción clara.",done:false,evidence:""},
+      {id:"linkedin",title:"LinkedIn",description:"Titular, resumen y proyectos orientados a problemas.",done:false,evidence:""},
+      {id:"english",title:"Defensa en inglés",description:"Ocho grabaciones y dos simulaciones de entrevista.",done:false,evidence:""},
+      {id:"sql-cert",title:"Microsoft SQL Server",description:"Opcional prioritario después de Sprint 4.",done:false,evidence:""},
+      {id:"pbi-cert",title:"Microsoft Power BI",description:"Complemento fuerte para dashboard y BI.",done:false,evidence:""},
+      {id:"ibm",title:"IBM AI / ML",description:"Opcional; solo si no duplica evidencia ya lograda.",done:false,evidence:""},
+      {id:"applications",title:"Campaña laboral",description:"40 postulaciones dirigidas y registro de respuestas.",done:false,evidence:""}
+    ];
+    var readings=[
+      {id:"read-1",title:"scikit-learn: Common pitfalls",category:"ML",type:"Documentación",progress:0,status:"planned",notes:"Aplicar leakage checklist a Home Credit"},
+      {id:"read-2",title:"Designing Machine Learning Systems",category:"Ingeniería",type:"Libro",progress:0,status:"planned",notes:"Leer capítulos alineados con Sprint 4"},
+      {id:"read-3",title:"Storytelling with Data",category:"Comunicación",type:"Libro",progress:0,status:"planned",notes:"Aplicar al dashboard"},
+      {id:"read-4",title:"Lectura de finanzas personales",category:"Finanzas",type:"Libro",progress:0,status:"planned",notes:"Elegir una fuente y registrar decisiones"}
+    ];
+    var defaultDailyTasks=[
+      {id:"daily-1",text:"Bloque principal AnyoneAI",category:"AnyoneAI",planned:4,actual:0,done:false},
+      {id:"daily-2",text:"Bloque Futura",category:"Futura",planned:3,actual:0,done:false},
+      {id:"daily-3",text:"Proyecto / evidencia",category:"Portafolio",planned:1.5,actual:0,done:false},
+      {id:"daily-4",text:"Coursera o inglés",category:"Complementaria",planned:1,actual:0,done:false},
+      {id:"daily-5",text:"Lectura y revisión",category:"Revisión",planned:.5,actual:0,done:false}
+    ];
+    var defaultState={
+      version:1,created:"2026-07-27",capacity:{daily:10,days:7},texts:{},programs:programs,weeks:weeks,
+      projects:projects,skills:skills,employ:employ,readings:readings,daily:{},reviews:{},activeProjectTab:"main"
+    };
+    var state=loadState();
+    var charts={};
+    var editMode=false;
+    var currentReviewWeek="week-1";
+    var currentDate=isoDate(new Date());
+
+    function clone(v){return JSON.parse(JSON.stringify(v))}
+    function mergeDefaults(saved,defaults){
+      if(!saved||typeof saved!=="object")return clone(defaults);
+      var out=clone(defaults);
+      Object.keys(saved).forEach(function(k){out[k]=saved[k]});
+      ["programs","weeks","projects","skills","employ","readings"].forEach(function(k){if(!Array.isArray(out[k]))out[k]=clone(defaults[k])});
+      if(!out.capacity)out.capacity=clone(defaults.capacity);if(!out.texts)out.texts={};if(!out.daily)out.daily={};if(!out.reviews)out.reviews={};
+      return out;
+    }
+    function loadState(){try{return mergeDefaults(JSON.parse(localStorage.getItem(STORAGE_KEY)),defaultState)}catch(e){return clone(defaultState)}}
+    function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateDashboard()}
+    function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+    function clamp(v,a,b){return Math.min(b,Math.max(a,Number(v)||0))}
+    function isoDate(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+    function uid(prefix){return prefix+"-"+Date.now()+"-"+Math.random().toString(16).slice(2)}
+    function toast(message){var t=document.getElementById("toast");t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(function(){t.classList.remove("show")},2400)}
+    function todayLabel(){return new Intl.DateTimeFormat("es-PE",{day:"numeric",month:"long",year:"numeric"}).format(new Date())}
+    function setEditableText(){
+      document.querySelectorAll("[data-edit-key]").forEach(function(el){
+        var key=el.dataset.editKey;if(state.texts[key]!=null)el.textContent=state.texts[key];
+        el.classList.add("editable");el.contentEditable=editMode?"true":"false";
+        if(!el.dataset.editBound){el.dataset.editBound="1";el.addEventListener("input",function(){state.texts[key]=el.textContent.trim();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))})}
+      });
+    }
+    function renderIndicators(){
+      var values=[["Madurez técnica",48],["Rigor analítico",36],["Ingeniería y producción",12],["Ventaja sectorial",22],["Capacidad comercial",41],["Capacidad de gestión",31],["Capacidad de ejecución",50],["Empleabilidad",47],["Potencial emprendedor",18],["Alcance internacional",52]];
+      document.getElementById("indicatorList").innerHTML=values.map(function(x){return'<div class="indicator"><span>'+esc(x[0])+'</span><span class="bar-track"><span class="bar-fill" style="width:'+x[1]+'%"></span></span><strong>'+x[1]+'</strong></div>'}).join("");
+      if(typeof Chart!=="undefined"){
+        if(charts.radar)charts.radar.destroy();
+        charts.radar=new Chart(document.getElementById("radarChart"),{type:"radar",data:{labels:values.map(function(x){return x[0]}),datasets:[{label:"Diagnóstico",data:values.map(function(x){return x[1]}),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.12)",pointBackgroundColor:"#2563eb",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100,ticks:{display:false},grid:{color:"rgba(148,163,184,.2)"},pointLabels:{font:{size:9}}}},plugins:{legend:{display:false}}}});
+      }
+    }
+    function renderAllocation(){
+      var weekly=state.capacity.daily*state.capacity.days;
+      document.getElementById("dailyCapacity").value=state.capacity.daily;document.getElementById("studyDays").value=state.capacity.days;document.getElementById("weeklyCapacity").value=weekly+" h";
+      document.querySelector("[data-capacity-label]").textContent=state.capacity.daily+" h/día";
+      var parts=[["AnyoneAI",.40],["Futura",.29],["Portafolio",.15],["Coursera + inglés",.10],["Revisión",.06]];
+      document.getElementById("hourStack").innerHTML=parts.map(function(p){return'<span class="hour-part" style="width:'+(p[1]*100)+'%">'+Math.round(weekly*p[1])+' h</span>'}).join("");
+      if(typeof Chart!=="undefined"){
+        if(charts.allocation)charts.allocation.destroy();
+        charts.allocation=new Chart(document.getElementById("allocationChart"),{type:"doughnut",data:{labels:parts.map(function(p){return p[0]}),datasets:[{data:parts.map(function(p){return Math.round(weekly*p[1]*10)/10}),backgroundColor:["#2563eb","#16a34a","#d97706","#7c3aed","#db2777"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"67%",plugins:{legend:{position:"bottom",labels:{boxWidth:10,font:{size:10}}}}}});
+      }
+    }
+    function renderPrograms(){
+      document.getElementById("programGrid").innerHTML=state.programs.map(function(p,pi){
+        var done=p.done.filter(Boolean).length;
+        return'<article class="program-card '+(pi===0?"is-primary":"")+'" data-program="'+esc(p.id)+'"><span class="badge">'+esc(p.priority)+'</span><h3><input class="control compact" data-program-field="name" value="'+esc(p.name)+'"></h3><textarea class="control" data-program-field="summary">'+esc(p.summary)+'</textarea><div class="module-list">'+p.modules.map(function(m,mi){return'<div class="task-row"><input type="checkbox" data-program-module="'+mi+'" '+(p.done[mi]?"checked":"")+'><input class="control compact" data-program-module-text="'+mi+'" value="'+esc(m)+'"><button class="btn btn-small btn-danger no-print" type="button" data-remove-program-module="'+mi+'">×</button></div>'}).join("")+'</div><p class="note">'+done+' de '+p.modules.length+' módulos marcados</p><div class="action-row no-print"><button class="btn btn-small" type="button" data-add-program-module>Añadir módulo</button><button class="btn btn-small btn-danger" type="button" data-delete-program>Eliminar fuente</button></div></article>'
+      }).join("");
+    }
+    function weekProgress(w){
+      var task=w.tasks.length?w.tasks.filter(function(t){return t.done}).length/w.tasks.length:0;
+      var hours=w.planned?Math.min(1,w.actual/w.planned):0;
+      var status=w.status==="completed"?1:w.status==="in_progress"?.45:0;
+      return Math.round((task*.55+hours*.25+status*.20)*100);
+    }
+    function renderWeeks(){
+      document.getElementById("timeline").innerHTML=state.weeks.map(function(w){var p=weekProgress(w);return'<div class="week-node '+(p===100?"is-complete":w.number===1?"is-current":"")+'" title="'+esc(w.title)+'">S'+w.number+'</div>'}).join("");
+      document.getElementById("weekList").innerHTML=state.weeks.map(function(w,i){
+        var p=weekProgress(w);
+        return'<details class="week" data-week-id="'+esc(w.id)+'" '+(i===0?"open":"")+'><summary><span class="week-number">Semana '+w.number+'</span><span><span class="week-title">'+esc(w.title)+'</span><span class="week-phase">'+esc(w.dates)+' · '+esc(w.phase)+'</span></span><span class="week-progress"><span class="bar-track"><span class="bar-fill" style="width:'+p+'%"></span></span><strong>'+p+'%</strong></span><span>›</span></summary><div class="week-body"><div class="field-grid"><div class="field"><label>Fechas</label><input class="control" data-week-field="dates" value="'+esc(w.dates)+'"></div><div class="field"><label>Fase</label><input class="control" data-week-field="phase" value="'+esc(w.phase)+'"></div><div class="field span-2"><label>Título</label><input class="control" data-week-field="title" value="'+esc(w.title)+'"></div><div class="field span-2"><label>Objetivo</label><textarea class="control" data-week-field="goal">'+esc(w.goal)+'</textarea></div><div class="field span-2"><label>Temas y foco</label><textarea class="control" data-week-field="focus">'+esc(w.focus)+'</textarea></div><div class="field"><label>Horas planificadas</label><input class="control" type="number" min="0" step=".5" data-week-field="planned" value="'+w.planned+'"></div><div class="field"><label>Horas reales</label><input class="control" type="number" min="0" step=".5" data-week-field="actual" value="'+w.actual+'"></div><div class="field"><label>Estado</label><select class="control" data-week-field="status">'+statusOptions(w.status)+'</select></div><div class="field"><label>Evidencia</label><input class="control" data-week-field="evidence" value="'+esc(w.evidence)+'" placeholder="Enlace, archivo o defensa"></div></div><h4 style="margin-top:18px">Actividades editables</h4><div class="task-list">'+w.tasks.map(function(t,ti){return'<div class="task-row"><input type="checkbox" data-week-task-done="'+ti+'" '+(t.done?"checked":"")+'><input class="control compact" data-week-task-text="'+ti+'" value="'+esc(t.text)+'"><button class="btn btn-small btn-danger no-print" type="button" data-remove-week-task="'+ti+'" aria-label="Eliminar actividad">×</button></div>'}).join("")+'</div><div class="field-grid"><div class="field span-2"><label>Bloqueos</label><textarea class="control" data-week-field="blockers">'+esc(w.blockers)+'</textarea></div><div class="field span-2"><label>Notas y reajuste</label><textarea class="control" data-week-field="notes">'+esc(w.notes)+'</textarea></div></div><div class="action-row no-print"><button class="btn btn-small" type="button" data-add-week-task>Añadir actividad</button><button class="btn btn-small btn-danger" type="button" data-delete-week>Eliminar semana</button></div></div></details>'
+      }).join("");
+      document.getElementById("roadmapPlanned").textContent=sum(state.weeks,"planned")+" h";document.getElementById("roadmapActual").textContent=sum(state.weeks,"actual")+" h";
+      renderReviewOptions();
+    }
+    function statusOptions(v){return[["not_started","No iniciada"],["in_progress","En curso"],["completed","Completada"],["replanned","Replanificada"],["blocked","Bloqueada"]].map(function(o){return'<option value="'+o[0]+'" '+(v===o[0]?"selected":"")+'>'+o[1]+'</option>'}).join("")}
+    function projectScore(p){return qualityRubric.reduce(function(s,r){return s+(p.quality[r.id]?r.weight:0)},0)}
+    function renderProjects(){
+      ["main","secondary"].forEach(function(cat){
+        var target=document.getElementById(cat==="main"?"mainProjects":"secondaryProjects");
+        target.innerHTML=state.projects.filter(function(p){return p.category===cat}).map(function(p){
+          var score=projectScore(p),taskPct=p.tasks.length?Math.round(p.tasks.filter(function(t){return t.done}).length/p.tasks.length*100):0;
+          return'<article class="card project-card" data-project-id="'+esc(p.id)+'"><div class="project-head"><div style="flex:1"><input class="control" data-project-field="title" value="'+esc(p.title)+'"><span class="badge" style="margin-top:9px">'+(p.category==="main"?"Principal":"Secundario")+'</span></div><div class="project-score">'+score+'<small>/100</small></div></div><textarea class="control" data-project-field="summary" style="margin-top:14px">'+esc(p.summary)+'</textarea><div class="field-grid" style="margin-top:12px"><div class="field span-2"><label>Stack</label><input class="control" data-project-field="stack" value="'+esc(p.stack)+'"></div><div class="field"><label>Estado</label><select class="control" data-project-field="status">'+projectStatusOptions(p.status)+'</select></div><div class="field"><label>Enlace</label><input class="control" data-project-field="link" value="'+esc(p.link)+'" placeholder="https://..."></div></div><h4 style="margin-top:18px">Plan de trabajo · '+taskPct+'%</h4><span class="bar-track"><span class="bar-fill" style="width:'+taskPct+'%"></span></span><div class="task-list">'+p.tasks.map(function(t,ti){return'<div class="task-row"><input type="checkbox" data-project-task-done="'+ti+'" '+(t.done?"checked":"")+'><input class="control compact" data-project-task-text="'+ti+'" value="'+esc(t.text)+'"><button class="btn btn-small btn-danger no-print" type="button" data-remove-project-task="'+ti+'">×</button></div>'}).join("")+'</div><h4>Puertas de calidad</h4><div class="quality-grid">'+qualityRubric.map(function(r){return'<label class="check-row"><input type="checkbox" data-quality="'+r.id+'" '+(p.quality[r.id]?"checked":"")+'>'+esc(r.label)+' · '+r.weight+'</label>'}).join("")+'</div><p class="'+(score>=75?"project-ok":"project-warning")+'">'+(score>=75?"Proyecto terminado por rúbrica.":"Menos de 75/100: sigue en construcción.")+'</p><div class="field"><label>Notas</label><textarea class="control" data-project-field="notes">'+esc(p.notes)+'</textarea></div><div class="action-row no-print"><button class="btn btn-small" type="button" data-add-project-task>Añadir fase</button><button class="btn btn-small btn-danger" type="button" data-delete-project>Eliminar proyecto</button></div></article>'
+        }).join("");
+      });
+    }
+    function projectStatusOptions(v){return[["planned","Planificado"],["active","Activo"],["paused","Pausado"],["complete","Terminado"],["discarded","Desestimado"]].map(function(o){return'<option value="'+o[0]+'" '+(v===o[0]?"selected":"")+'>'+o[1]+'</option>'}).join("")}
+    function renderSkills(){
+      document.getElementById("skillBody").innerHTML=state.skills.map(function(s){
+        return'<tr data-skill-id="'+esc(s.id)+'"><td><input class="control compact" data-skill-field="name" value="'+esc(s.name)+'"><span class="skill-error"></span></td><td><input class="control compact" data-skill-field="category" value="'+esc(s.category)+'"></td><td><select class="control compact" data-skill-field="target">'+levelOptions(s.target)+'</select></td><td><select class="control compact" data-skill-field="level">'+levelOptions(s.level)+'</select></td><td><input class="control compact" type="number" min="0" step=".5" data-skill-field="hours" value="'+s.hours+'"></td><td><textarea class="control" data-skill-field="evidence" placeholder="Describe o enlaza evidencia">'+esc(s.evidence)+'</textarea></td><td><select class="control compact" data-skill-field="status">'+skillStatusOptions(s.status)+'</select></td><td><textarea class="control" data-skill-field="next">'+esc(s.next)+'</textarea></td><td><button class="btn btn-small" type="button" data-save-skill>Guardar</button><button class="btn btn-small btn-danger no-print" type="button" data-delete-skill style="margin-top:6px">Eliminar</button></td></tr>'
+      }).join("");
+    }
+    function levelOptions(v){return[0,1,2,3,4].map(function(n){return'<option value="'+n+'" '+(Number(v)===n?"selected":"")+'>Nivel '+n+'</option>'}).join("")}
+    function skillStatusOptions(v){return[["pending","Pendiente"],["learning","Aprendiendo"],["practicing","Practicando"],["demonstrated","Demostrada"],["consolidated","Consolidada"],["blocked","Bloqueada"]].map(function(o){return'<option value="'+o[0]+'" '+(v===o[0]?"selected":"")+'>'+o[1]+'</option>'}).join("")}
+    function ensureDay(date){
+      if(!state.daily[date])state.daily[date]={tasks:clone(defaultDailyTasks),sleep:7,exercise:0,focus:3,badHabitFree:false,notes:""};
+      return state.daily[date];
+    }
+    function renderDaily(){
+      var d=ensureDay(currentDate);document.getElementById("plannerDate").value=currentDate;
+      document.getElementById("dailyTasks").innerHTML=d.tasks.map(function(t,i){return'<div class="daily-task"><input type="checkbox" data-daily-done="'+i+'" '+(t.done?"checked":"")+'><input class="control compact" data-daily-field="text" data-index="'+i+'" value="'+esc(t.text)+'"><input class="control compact" data-daily-field="category" data-index="'+i+'" value="'+esc(t.category)+'"><input class="control compact" type="number" min="0" step=".25" data-daily-field="planned" data-index="'+i+'" value="'+t.planned+'" title="Horas planificadas"><input class="control compact" type="number" min="0" step=".25" data-daily-field="actual" data-index="'+i+'" value="'+t.actual+'" title="Horas reales"><button class="btn btn-small btn-danger no-print" type="button" data-delete-daily="'+i+'">×</button></div>'}).join("");
+      document.getElementById("sleepHours").value=d.sleep;document.getElementById("exerciseMinutes").value=d.exercise;document.getElementById("focusScore").value=d.focus;document.getElementById("badHabitFree").checked=d.badHabitFree;document.getElementById("energyNotes").value=d.notes;updateDailyMetrics();
+    }
+    function updateDailyMetrics(){
+      var d=ensureDay(currentDate),planned=sum(d.tasks,"planned"),actual=sum(d.tasks,"actual"),pct=planned?Math.round(Math.min(1,actual/planned)*100):0;
+      document.getElementById("dailyPlanned").value=planned+" h";document.getElementById("dailyActual").value=actual+" h";document.getElementById("dailyCompletion").value=pct+"%";
+      var score=Math.round(clamp(d.sleep/7,0,1)*35+clamp(d.exercise/30,0,1)*20+clamp(d.focus/5,0,1)*30+(d.badHabitFree?15:0));
+      document.getElementById("energyScore").textContent=score;
+    }
+    function renderReadings(){
+      document.getElementById("readingList").innerHTML=state.readings.map(function(r,i){return'<div class="reading-row" data-reading-id="'+esc(r.id)+'"><input class="control compact" data-reading-field="title" value="'+esc(r.title)+'"><input class="control compact" data-reading-field="category" value="'+esc(r.category)+'"><input class="control compact" data-reading-field="type" value="'+esc(r.type)+'"><input class="control compact" type="number" min="0" max="100" step="5" data-reading-field="progress" value="'+r.progress+'" title="Progreso %"><select class="control compact" data-reading-field="status">'+readingStatusOptions(r.status)+'</select><input class="control compact" data-reading-field="notes" value="'+esc(r.notes)+'"><button class="btn btn-small btn-danger no-print" type="button" data-delete-reading="'+i+'">×</button></div>'}).join("");
+    }
+    function readingStatusOptions(v){return[["planned","Planificada"],["reading","Leyendo"],["applied","Aplicada"],["complete","Terminada"],["abandoned","Desestimada"]].map(function(o){return'<option value="'+o[0]+'" '+(v===o[0]?"selected":"")+'>'+o[1]+'</option>'}).join("")}
+    function renderEmploy(){
+      document.getElementById("employGrid").innerHTML=state.employ.map(function(e){return'<article class="employ-item" data-employ-id="'+esc(e.id)+'"><h3><input class="control compact" data-employ-field="title" value="'+esc(e.title)+'"></h3><textarea class="control" data-employ-field="description">'+esc(e.description)+'</textarea><label class="check-row" style="margin-top:9px"><input type="checkbox" data-employ-done '+(e.done?"checked":"")+'> Evidencia terminada</label><input class="control compact" data-employ-field="evidence" value="'+esc(e.evidence)+'" placeholder="Enlace o evidencia" style="margin-top:8px"><button class="btn btn-small btn-danger no-print" type="button" data-delete-employ style="margin-top:8px">Eliminar objetivo</button></article>'}).join("");
+    }
+    function renderReviewOptions(){
+      var sel=document.getElementById("reviewWeek");sel.innerHTML=state.weeks.map(function(w){return'<option value="'+esc(w.id)+'" '+(currentReviewWeek===w.id?"selected":"")+'>Semana '+w.number+' · '+esc(w.title)+'</option>'}).join("");if(!state.weeks.some(function(w){return w.id===currentReviewWeek})&&state.weeks[0])currentReviewWeek=state.weeks[0].id;loadReview();
+    }
+    function loadReview(){
+      var r=state.reviews[currentReviewWeek]||{};document.querySelectorAll("[data-review-field]").forEach(function(el){el.value=r[el.dataset.reviewField]||""});
+    }
+    function sum(arr,key){return Math.round(arr.reduce(function(s,x){return s+(Number(x[key])||0)},0)*100)/100}
+    function updateDashboard(){
+      var weekPct=state.weeks.length?state.weeks.reduce(function(s,w){return s+weekProgress(w)},0)/state.weeks.length:0;
+      var projectPct=state.projects.length?state.projects.reduce(function(s,p){var task=p.tasks.length?p.tasks.filter(function(t){return t.done}).length/p.tasks.length*100:0;return s+(task*.55+projectScore(p)*.45)},0)/state.projects.length:0;
+      var skillPct=state.skills.length?state.skills.reduce(function(s,x){return s+clamp(x.level/(x.target||1),0,1)*100},0)/state.skills.length:0;
+      var employPct=state.employ.length?state.employ.filter(function(e){return e.done}).length/state.employ.length*100:0;
+      var readingPct=state.readings.length?state.readings.reduce(function(s,r){return s+(Number(r.progress)||0)},0)/state.readings.length:0;
+      var d=ensureDay(currentDate),dailyPct=d.tasks.length?d.tasks.filter(function(t){return t.done}).length/d.tasks.length*100:0;
+      var overall=Math.round(weekPct*.30+projectPct*.25+skillPct*.20+employPct*.10+dailyPct*.10+readingPct*.05);
+      document.querySelector("[data-global-progress]").textContent=overall;document.querySelector("[data-global-gauge]").style.strokeDashoffset=465-(465*overall/100);document.querySelector("[data-global-bar]").style.width=overall+"%";
+      document.querySelector("[data-total-hours]").textContent=Math.round((sum(state.weeks,"actual")+sum(d.tasks,"actual"))*10)/10;
+      document.querySelector("[data-active-projects]").textContent=state.projects.filter(function(p){return p.status==="active"}).length;
+      document.querySelector("[data-demonstrated-skills]").textContent=state.skills.filter(function(s){return s.status==="demonstrated"||s.status==="consolidated"}).length;
+      var current=state.weeks.find(function(w){return w.status==="in_progress"})||state.weeks.find(function(w){return w.status==="not_started"})||state.weeks[state.weeks.length-1];document.querySelector("[data-current-week]").textContent=current?"Semana "+current.number:"Ciclo cerrado";
+      document.getElementById("roadmapPlanned").textContent=sum(state.weeks,"planned")+" h";document.getElementById("roadmapActual").textContent=sum(state.weeks,"actual")+" h";
+      var ep=Math.round(employPct);document.getElementById("employBar").style.width=ep+"%";document.getElementById("employPercent").textContent=ep+"%";updateDailyMetrics();
+    }
+    function bindTabs(){
+      document.addEventListener("click",function(e){
+        var btn=e.target.closest("[data-tab]");if(!btn)return;var scope=btn.closest("[data-tab-scope]");if(!scope)return;
+        scope.querySelectorAll("[data-tab]").forEach(function(b){b.classList.toggle("is-active",b===btn)});
+        scope.querySelectorAll("[data-tabid]").forEach(function(p){p.classList.toggle("is-active",p.dataset.tabid===btn.dataset.tab)});
+        if(btn.dataset.tab.indexOf("projects-")===0)state.activeProjectTab=btn.dataset.tab.replace("projects-","");saveState();
+      });
+    }
+    function bindPrograms(){
+      document.getElementById("programGrid").addEventListener("input",function(e){var card=e.target.closest("[data-program]");if(!card)return;var p=state.programs.find(function(x){return x.id===card.dataset.program});if(e.target.dataset.programField)p[e.target.dataset.programField]=e.target.value;if(e.target.dataset.programModuleText!=null)p.modules[Number(e.target.dataset.programModuleText)]=e.target.value;saveState()});
+      document.getElementById("programGrid").addEventListener("change",function(e){var card=e.target.closest("[data-program]");if(!card||e.target.dataset.programModule==null)return;var p=state.programs.find(function(x){return x.id===card.dataset.program});p.done[Number(e.target.dataset.programModule)]=e.target.checked;saveState();renderPrograms()});
+      document.getElementById("programGrid").addEventListener("click",function(e){var card=e.target.closest("[data-program]");if(!card)return;var pi=state.programs.findIndex(function(x){return x.id===card.dataset.program}),p=state.programs[pi];if(e.target.closest("[data-add-program-module]")){p.modules.push("Nuevo módulo");p.done.push(false);saveState();renderPrograms()}if(e.target.closest("[data-remove-program-module]")){var mi=Number(e.target.closest("[data-remove-program-module]").dataset.removeProgramModule);p.modules.splice(mi,1);p.done.splice(mi,1);saveState();renderPrograms()}if(e.target.closest("[data-delete-program]")&&confirm("¿Eliminar esta fuente de aprendizaje?")){state.programs.splice(pi,1);saveState();renderPrograms()}});
+      document.getElementById("addProgramBtn").addEventListener("click",function(){state.programs.push({id:uid("program"),name:"Nueva fuente",priority:"Personalizada",summary:"Define cómo cubrirá una brecha.",modules:["Nuevo módulo"],done:[false]});saveState();renderPrograms();toast("Fuente añadida")});
+    }
+    function bindWeeks(){
+      var list=document.getElementById("weekList");
+      list.addEventListener("input",function(e){var box=e.target.closest("[data-week-id]");if(!box)return;var w=state.weeks.find(function(x){return x.id===box.dataset.weekId});if(e.target.dataset.weekField){var k=e.target.dataset.weekField;w[k]=["planned","actual"].includes(k)?Number(e.target.value):e.target.value}if(e.target.dataset.weekTaskText!=null)w.tasks[Number(e.target.dataset.weekTaskText)].text=e.target.value;saveState()});
+      list.addEventListener("change",function(e){var box=e.target.closest("[data-week-id]");if(!box)return;var w=state.weeks.find(function(x){return x.id===box.dataset.weekId});if(e.target.dataset.weekTaskDone!=null){w.tasks[Number(e.target.dataset.weekTaskDone)].done=e.target.checked;saveState();renderWeeks()}});
+      list.addEventListener("click",function(e){var box=e.target.closest("[data-week-id]");if(!box)return;var wi=state.weeks.findIndex(function(x){return x.id===box.dataset.weekId}),w=state.weeks[wi];if(e.target.closest("[data-add-week-task]")){w.tasks.push({id:uid("wt"),text:"Nueva actividad",done:false});saveState();renderWeeks()}if(e.target.closest("[data-remove-week-task]")){w.tasks.splice(Number(e.target.closest("[data-remove-week-task]").dataset.removeWeekTask),1);saveState();renderWeeks()}if(e.target.closest("[data-delete-week]")&&confirm("¿Eliminar esta semana del roadmap?")){state.weeks.splice(wi,1);renumberWeeks();saveState();renderWeeks()}});
+      document.getElementById("addWeekBtn").addEventListener("click",function(){var n=state.weeks.length+1;state.weeks.push({id:uid("week"),number:n,dates:"Por definir",phase:"Personalizada",title:"Nueva semana",goal:"Define un objetivo verificable.",focus:"Temas por definir",tasks:[{id:uid("wt"),text:"Nueva actividad",done:false}],planned:state.capacity.daily*state.capacity.days,actual:0,status:"not_started",evidence:"",blockers:"",notes:""});saveState();renderWeeks();toast("Semana añadida")});
+    }
+    function renumberWeeks(){state.weeks.forEach(function(w,i){w.number=i+1})}
+    function bindProjects(){
+      document.getElementById("proyectos").addEventListener("input",function(e){var card=e.target.closest("[data-project-id]");if(!card)return;var p=state.projects.find(function(x){return x.id===card.dataset.projectId});if(e.target.dataset.projectField)p[e.target.dataset.projectField]=e.target.value;if(e.target.dataset.projectTaskText!=null)p.tasks[Number(e.target.dataset.projectTaskText)].text=e.target.value;saveState()});
+      document.getElementById("proyectos").addEventListener("change",function(e){var card=e.target.closest("[data-project-id]");if(!card)return;var p=state.projects.find(function(x){return x.id===card.dataset.projectId});if(e.target.dataset.projectTaskDone!=null)p.tasks[Number(e.target.dataset.projectTaskDone)].done=e.target.checked;if(e.target.dataset.quality)p.quality[e.target.dataset.quality]=e.target.checked;saveState();renderProjects()});
+      document.getElementById("proyectos").addEventListener("click",function(e){var card=e.target.closest("[data-project-id]");if(!card)return;var pi=state.projects.findIndex(function(x){return x.id===card.dataset.projectId}),p=state.projects[pi];if(e.target.closest("[data-add-project-task]")){p.tasks.push({id:uid("pt"),text:"Nueva fase",done:false});saveState();renderProjects()}if(e.target.closest("[data-remove-project-task]")){p.tasks.splice(Number(e.target.closest("[data-remove-project-task]").dataset.removeProjectTask),1);saveState();renderProjects()}if(e.target.closest("[data-delete-project]")&&confirm("¿Eliminar este proyecto?")){state.projects.splice(pi,1);saveState();renderProjects()}});
+      document.getElementById("addProjectBtn").addEventListener("click",function(){state.projects.push({id:uid("project"),category:state.activeProjectTab||"main",title:"Nuevo proyecto",summary:"Define problema, usuario y decisión.",stack:"Por definir",link:"",status:"planned",tasks:[{id:uid("pt"),text:"Definir alcance",done:false}],quality:{},notes:""});saveState();renderProjects();toast("Proyecto añadido")});
+    }
+    function bindSkills(){
+      var body=document.getElementById("skillBody");
+      body.addEventListener("click",function(e){var row=e.target.closest("[data-skill-id]");if(!row)return;var i=state.skills.findIndex(function(s){return s.id===row.dataset.skillId}),s=state.skills[i];if(e.target.closest("[data-delete-skill]")&&confirm("¿Eliminar esta habilidad?")){state.skills.splice(i,1);saveState();renderSkills();return}if(e.target.closest("[data-save-skill]")){var values={};row.querySelectorAll("[data-skill-field]").forEach(function(el){values[el.dataset.skillField]=el.value});var desired=Number(values.level),err=row.querySelector(".skill-error");if(desired>s.lastSavedLevel&&String(values.evidence||"").trim().length<12){err.textContent="Añade evidencia concreta antes de subir de nivel.";row.querySelector('[data-skill-field="level"]').value=s.lastSavedLevel;return}Object.keys(values).forEach(function(k){s[k]=["target","level","hours"].includes(k)?Number(values[k]):values[k]});s.lastSavedLevel=s.level;err.textContent="";saveState();toast("Habilidad guardada")}});document.getElementById("addSkillBtn").addEventListener("click",function(){state.skills.push({id:uid("skill"),name:"Nueva habilidad",category:"Personalizada",target:1,level:0,hours:0,evidence:"",status:"pending",next:"Definir siguiente acción",lastSavedLevel:0});saveState();renderSkills()});
+    }
+    function bindDaily(){
+      document.getElementById("plannerDate").addEventListener("change",function(e){currentDate=e.target.value||isoDate(new Date());renderDaily();updateDashboard()});
+      document.getElementById("dailyTasks").addEventListener("input",function(e){var d=ensureDay(currentDate),i=Number(e.target.dataset.index);if(e.target.dataset.dailyField)d.tasks[i][e.target.dataset.dailyField]=["planned","actual"].includes(e.target.dataset.dailyField)?Number(e.target.value):e.target.value;saveState()});
+      document.getElementById("dailyTasks").addEventListener("change",function(e){if(e.target.dataset.dailyDone!=null){ensureDay(currentDate).tasks[Number(e.target.dataset.dailyDone)].done=e.target.checked;saveState()}});
+      document.getElementById("dailyTasks").addEventListener("click",function(e){if(e.target.dataset.deleteDaily!=null){ensureDay(currentDate).tasks.splice(Number(e.target.dataset.deleteDaily),1);saveState();renderDaily()}});
+      document.getElementById("addDailyTaskBtn").addEventListener("click",function(){ensureDay(currentDate).tasks.push({id:uid("daily"),text:"Nueva tarea",category:"Personalizada",planned:1,actual:0,done:false});saveState();renderDaily()});
+      [["sleepHours","sleep"],["exerciseMinutes","exercise"],["focusScore","focus"],["energyNotes","notes"]].forEach(function(pair){document.getElementById(pair[0]).addEventListener("input",function(e){ensureDay(currentDate)[pair[1]]=["sleep","exercise","focus"].includes(pair[1])?Number(e.target.value):e.target.value;saveState()})});
+      document.getElementById("badHabitFree").addEventListener("change",function(e){ensureDay(currentDate).badHabitFree=e.target.checked;saveState()});
+    }
+    function bindReadings(){
+      document.getElementById("readingList").addEventListener("input",function(e){var row=e.target.closest("[data-reading-id]");if(!row||!e.target.dataset.readingField)return;var r=state.readings.find(function(x){return x.id===row.dataset.readingId});r[e.target.dataset.readingField]=e.target.dataset.readingField==="progress"?Number(e.target.value):e.target.value;saveState()});
+      document.getElementById("readingList").addEventListener("click",function(e){if(e.target.dataset.deleteReading!=null){state.readings.splice(Number(e.target.dataset.deleteReading),1);saveState();renderReadings()}});
+      document.getElementById("addReadingBtn").addEventListener("click",function(){state.readings.push({id:uid("read"),title:"Nueva lectura",category:"Personal",type:"Libro / artículo",progress:0,status:"planned",notes:"Aplicación esperada"});saveState();renderReadings()});
+    }
+    function bindEmploy(){
+      document.getElementById("employGrid").addEventListener("input",function(e){var card=e.target.closest("[data-employ-id]");if(!card||!e.target.dataset.employField)return;var x=state.employ.find(function(v){return v.id===card.dataset.employId});x[e.target.dataset.employField]=e.target.value;saveState()});
+      document.getElementById("employGrid").addEventListener("change",function(e){var card=e.target.closest("[data-employ-id]");if(!card||!e.target.hasAttribute("data-employ-done"))return;var x=state.employ.find(function(v){return v.id===card.dataset.employId});x.done=e.target.checked;saveState()});
+      document.getElementById("employGrid").addEventListener("click",function(e){var card=e.target.closest("[data-employ-id]");if(!card||!e.target.closest("[data-delete-employ]"))return;var i=state.employ.findIndex(function(v){return v.id===card.dataset.employId});if(confirm("¿Eliminar este objetivo de empleabilidad?")){state.employ.splice(i,1);saveState();renderEmploy()}});
+      document.getElementById("addEmployBtn").addEventListener("click",function(){state.employ.push({id:uid("employ"),title:"Nuevo objetivo",description:"Define el criterio de finalización.",done:false,evidence:""});saveState();renderEmploy();toast("Objetivo añadido")});
+    }
+    function bindReview(){
+      document.getElementById("reviewWeek").addEventListener("change",function(e){currentReviewWeek=e.target.value;loadReview()});document.querySelectorAll("[data-review-field]").forEach(function(el){el.addEventListener("input",function(){if(!state.reviews[currentReviewWeek])state.reviews[currentReviewWeek]={};state.reviews[currentReviewWeek][el.dataset.reviewField]=el.value;saveState()})});
+    }
+    function bindHeader(){
+      document.getElementById("editBtn").addEventListener("click",function(){editMode=!editMode;document.body.classList.toggle("is-editing",editMode);setEditableText();toast(editMode?"Edición de textos activada":"Edición de textos cerrada")});
+      document.getElementById("themeBtn").addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem(THEME_KEY,next);renderIndicators();renderAllocation()});
+      document.getElementById("printBtn").addEventListener("click",function(){window.print()});
+      document.getElementById("exportBtn").addEventListener("click",function(){var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="trainer-carrera-tech-"+isoDate(new Date())+".json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);toast("Copia exportada")});
+      document.getElementById("importBtn").addEventListener("click",function(){document.getElementById("importFile").click()});document.getElementById("importFile").addEventListener("change",function(e){var file=e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{state=mergeDefaults(JSON.parse(reader.result),defaultState);saveState();renderAll();toast("Copia restaurada")}catch(err){alert("El archivo no contiene una copia válida.")}};reader.readAsText(file);e.target.value=""});
+      document.getElementById("resetBtn").addEventListener("click",function(){if(confirm("¿Reiniciar todo el Trainer? Exporta una copia si deseas conservar el progreso.")){state=clone(defaultState);localStorage.removeItem(STORAGE_KEY);currentDate=isoDate(new Date());currentReviewWeek="week-1";renderAll();toast("Trainer reiniciado")}});
+      document.getElementById("dailyCapacity").addEventListener("input",function(e){state.capacity.daily=clamp(e.target.value,1,16);saveState();renderAllocation()});document.getElementById("studyDays").addEventListener("input",function(e){state.capacity.days=clamp(e.target.value,1,7);saveState();renderAllocation()});
+    }
+    function renderAll(){
+      document.querySelectorAll("[data-current-date]").forEach(function(el){el.textContent=todayLabel()});setEditableText();renderIndicators();renderAllocation();renderPrograms();renderWeeks();renderProjects();renderSkills();renderDaily();renderReadings();renderEmploy();updateDashboard();
+      document.querySelectorAll("[data-tab-scope]").forEach(function(scope){scope.querySelectorAll("[data-tab]").forEach(function(b){if(b.dataset.tab.indexOf("projects-")===0)b.classList.toggle("is-active",b.dataset.tab==="projects-"+state.activeProjectTab)});scope.querySelectorAll("[data-tabid]").forEach(function(p){if(p.dataset.tabid.indexOf("projects-")===0)p.classList.toggle("is-active",p.dataset.tabid==="projects-"+state.activeProjectTab)})});
+    }
+    document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||"light";
+    bindTabs();bindPrograms();bindWeeks();bindProjects();bindSkills();bindDaily();bindReadings();bindEmploy();bindReview();bindHeader();renderAll();
+  })();
+  </script>
+</body>
+</html>
