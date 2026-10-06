@@ -10,8 +10,14 @@ const html = fs.readFileSync(
 test("the sidebar exposes six unnumbered primary areas", () => {
   assert.equal((html.match(/class="nav-button nav-primary/g) ?? []).length, 6);
   assert.equal((html.match(/data-group-toggle=/g) ?? []).length, 5);
-  assert.equal((html.match(/class="nav-button nav-child/g) ?? []).length, 15);
+  assert.equal((html.match(/class="nav-button nav-child/g) ?? []).length, 14);
   assert.equal((html.match(/nav-icon/g) ?? []).length, 0);
+});
+
+test("the deleted Home Credit project is absent from navigation", () => {
+  assert.doesNotMatch(html, /data-view="home-credit"/);
+  assert.doesNotMatch(html, /"home-credit":\{group:"Proyectos"/);
+  assert.match(html, /homeCard\("Proyecto activo"[^\n]+"proyectos-secundarios","Abrir proyecto"\)/);
 });
 
 test("the requested labels and hierarchy are present", () => {

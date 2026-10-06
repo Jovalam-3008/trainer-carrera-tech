@@ -108,7 +108,6 @@
         <div class="nav-group" data-nav-group="proyectos">
           <button class="nav-button nav-primary" type="button" data-group-toggle="proyectos" aria-expanded="false">Proyectos<span class="nav-chevron" aria-hidden="true">›</span></button>
           <div class="nav-submenu"><div class="nav-submenu-inner">
-            <button class="nav-button nav-child" type="button" data-view="home-credit">Home Credit</button>
             <button class="nav-button nav-child" type="button" data-view="proyectos-secundarios">Proyectos secundarios</button>
           </div></div>
         </div>
@@ -194,7 +193,6 @@
       habilidades:{group:"Aprendizaje",title:"Habilidades",sections:["#tracker"]},
       roadmap:{group:"Aprendizaje",title:"Roadmap",sections:["#roadmap"],mode:"roadmap"},
       fuentes:{group:"Aprendizaje",title:"Fuentes de aprendizaje",sections:["#roadmap"],mode:"sources"},
-      "home-credit":{group:"Proyectos",title:"Home Credit",sections:["#proyectos"],mode:"projects-main"},
       "proyectos-secundarios":{group:"Proyectos",title:"Proyectos secundarios",sections:["#proyectos"],mode:"projects-secondary"},
       "plan-diario":{group:"Productividad",title:"Plan diario",sections:["#plan-diario"]},
       energia:{group:"Productividad",title:"Energía mensual",sections:["#v2-energy-analytics"]},
@@ -351,7 +349,7 @@
       grid.innerHTML=[
         homeCard("Siguiente foco",current?"Semana "+current.number+" · "+current.title:"Ciclo cerrado",current?current.goal:"Define el próximo ciclo.","roadmap","Abrir roadmap"),
         homeCard("Hoy",done+" de "+total+" tareas",day?sumTasks(day.tasks,"actual")+" h reales":"Todavía sin registro.","plan-diario","Planificar el día"),
-        homeCard("Proyecto activo",project?project.title:"Sin proyecto activo",project?project.summary:"Añade un proyecto y define su decisión.","home-credit","Abrir proyecto"),
+        homeCard("Proyecto activo",project?project.title:"Sin proyecto activo",project?project.summary:"Añade un proyecto y define su decisión.","proyectos-secundarios","Abrir proyecto"),
         homeCard("Energía",energy+" / 100",day?"Sueño "+(day.sleep||0)+" h · enfoque "+(day.focus||0)+"/5":"Registra sueño, ejercicio y enfoque.","energia","Ver el mes"),
         homeCard("Habilidad sin evidencia",skill?skill.name:"Sin brecha urgente",skill?"Nivel "+skill.level+" → "+skill.target+" · "+skill.next:"Revisa el tracker.","habilidades","Abrir habilidades"),
         homeCard("Fuentes activas",(state.programs||[]).length+" fuentes","AnyoneAI y Futura mantienen la prioridad.","fuentes","Ver fuentes"),
