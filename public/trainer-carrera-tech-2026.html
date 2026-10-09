@@ -86,6 +86,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
     @media print{@page{size:A4;margin:1.4cm}:root,:root[data-theme="dark"]{--bg:#fff;--card:#fff;--text:#000;--text-2:#333;--border:#bbb;--accent:#174ea6;--shadow:none}body{background:#fff;color:#000;font-size:9pt}.site-header,.no-print,.btn,.tabs,.toast{display:none!important}.container{width:100%}main{padding:0}section{margin-top:28px}.hero{padding:0}h1{font-size:28pt}.card,details.week,.project-card{box-shadow:none;break-inside:avoid}.tab-content{display:block!important}details.week .week-body{display:block!important}.table-responsive{overflow:visible}a{color:#000;text-decoration:none}}
   </style>
+  <link rel="stylesheet" href="trainer-extensions.css">
 </head>
 <body>
   <header class="site-header">
@@ -264,16 +265,17 @@
     <section id="tracker">
       <div class="container">
         <div class="section-head">
-          <div><div class="eyebrow">07 · Tracker</div><h2 class="editable" data-edit-key="tracker.title">Habilidades con validación por evidencia</h2></div>
-          <p class="editable" data-edit-key="tracker.copy">Todas las filas son editables. Para subir de nivel debes registrar una evidencia de al menos 12 caracteres.</p>
+          <div><div class="eyebrow">07 · Mapa de competencias</div><h2 class="editable" data-edit-key="tracker.title">AI / ML Engineering Master Checklist</h2></div>
+          <p class="editable" data-edit-key="tracker.copy">Avanza por competencias, no por cursos terminados. Dominado exige explicación, aplicación y una evidencia de trabajo propio.</p>
         </div>
-        <div class="card table-responsive">
+        <div id="competencyRoot"></div>
+        <details class="tc-legacy"><summary>Tracker anterior de habilidades · conservar y editar</summary><div class="card table-responsive">
           <table class="skill-table" aria-label="Tracker de habilidades">
             <thead><tr><th>Habilidad</th><th>Categoría</th><th>Objetivo</th><th>Nivel</th><th>Horas</th><th>Evidencia</th><th>Estado</th><th>Próxima acción</th><th>Acción</th></tr></thead>
             <tbody id="skillBody"></tbody>
           </table>
           <div class="action-row no-print"><button class="btn btn-primary" id="addSkillBtn" type="button">Añadir habilidad</button></div>
-        </div>
+        </div></details>
       </div>
     </section>
 
@@ -283,6 +285,7 @@
           <div><div class="eyebrow">08 · Plan diario y energía</div><h2 class="editable" data-edit-key="daily.title">La disciplina académica empieza fuera del escritorio</h2></div>
           <p class="editable" data-edit-key="daily.copy">Planifica tareas, registra horas reales y protege sueño, ejercicio y atención. El objetivo es rendimiento sostenible, no acumular tiempo sentado.</p>
         </div>
+        <div id="calendarRoot"></div>
         <div class="planner-grid">
           <div class="card">
             <div class="field-grid">
@@ -386,6 +389,7 @@
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="trainer-extensions.js"></script>
   <script>
   (function(){
     "use strict";
@@ -482,8 +486,8 @@
       {id:"daily-5",text:"Lectura y revisión",category:"Revisión",planned:.5,actual:0,done:false}
     ];
     var defaultState={
-      version:1,created:"2026-07-27",capacity:{daily:10,days:7},texts:{},programs:programs,weeks:weeks,
-      projects:projects,skills:skills,employ:employ,readings:readings,daily:{},reviews:{},activeProjectTab:"main"
+      version:2,created:"2026-07-27",capacity:{daily:10,days:7},texts:{},programs:programs,weeks:weeks,
+      projects:projects,skills:skills,employ:employ,readings:readings,daily:{},reviews:{},activeProjectTab:"main",competencies:{},customCompetencies:[],calendarEvents:[]
     };
     var state=loadState();
     var charts={};
@@ -498,6 +502,9 @@
       Object.keys(saved).forEach(function(k){out[k]=saved[k]});
       ["programs","weeks","projects","skills","employ","readings"].forEach(function(k){if(!Array.isArray(out[k]))out[k]=clone(defaults[k])});
       if(!out.capacity)out.capacity=clone(defaults.capacity);if(!out.texts)out.texts={};if(!out.daily)out.daily={};if(!out.reviews)out.reviews={};
+      if(!out.competencies||typeof out.competencies!=="object")out.competencies={};
+      if(!Array.isArray(out.customCompetencies))out.customCompetencies=[];
+      if(!Array.isArray(out.calendarEvents))out.calendarEvents=[];
       return out;
     }
     function loadState(){try{return mergeDefaults(JSON.parse(localStorage.getItem(STORAGE_KEY)),defaultState)}catch(e){return clone(defaultState)}}
@@ -684,11 +691,12 @@
       document.getElementById("dailyCapacity").addEventListener("input",function(e){state.capacity.daily=clamp(e.target.value,1,16);saveState();renderAllocation()});document.getElementById("studyDays").addEventListener("input",function(e){state.capacity.days=clamp(e.target.value,1,7);saveState();renderAllocation()});
     }
     function renderAll(){
-      document.querySelectorAll("[data-current-date]").forEach(function(el){el.textContent=todayLabel()});setEditableText();renderIndicators();renderAllocation();renderPrograms();renderWeeks();renderProjects();renderSkills();renderDaily();renderReadings();renderEmploy();updateDashboard();
+      document.querySelectorAll("[data-current-date]").forEach(function(el){el.textContent=todayLabel()});setEditableText();renderIndicators();renderAllocation();renderPrograms();renderWeeks();renderProjects();renderSkills();renderDaily();renderReadings();renderEmploy();updateDashboard();if(window.TrainerExtensions)window.TrainerExtensions.render();
       document.querySelectorAll("[data-tab-scope]").forEach(function(scope){scope.querySelectorAll("[data-tab]").forEach(function(b){if(b.dataset.tab.indexOf("projects-")===0)b.classList.toggle("is-active",b.dataset.tab==="projects-"+state.activeProjectTab)});scope.querySelectorAll("[data-tabid]").forEach(function(p){if(p.dataset.tabid.indexOf("projects-")===0)p.classList.toggle("is-active",p.dataset.tabid==="projects-"+state.activeProjectTab)})});
     }
     document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||"light";
     bindTabs();bindPrograms();bindWeeks();bindProjects();bindSkills();bindDaily();bindReadings();bindEmploy();bindReview();bindHeader();renderAll();
+    if(window.TrainerExtensions)window.TrainerExtensions.init({getState:function(){return state},save:saveState,isoDate:isoDate});
   })();
   </script>
 </body>
