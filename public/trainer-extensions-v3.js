@@ -1,3 +1,4 @@
+/* Matriz de competencias y revisiones de la ruta flexible. */
 (function () {
   "use strict";
 
