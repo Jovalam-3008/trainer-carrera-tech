@@ -148,6 +148,7 @@
   let search = "";
   let filter = "all";
   let showHidden = false;
+  let reviewWeekOffset = 0;
   const evidenceOpen = new Set();
 
   function esc(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
@@ -213,6 +214,88 @@
     const pct = n.total ? Math.round(n.weight / (n.total * 3) * 100) : 0;
     root.querySelector("#tcCompetencySummary").innerHTML = '<div><span>Competencias activas</span><strong>' + n.total + '</strong></div><div><span>En práctica o dominio</span><strong>' + n.practiced + '</strong></div><div><span>Dominadas con evidencia</span><strong>' + n.mastered + '</strong></div><div><span>Avance ponderado</span><strong>' + pct + '%</strong></div>';
     root.querySelector("#tcModuleList").innerHTML = MODULES.map(m => moduleCard(m, previousOpen)).join("") || '<p class="tc-empty">No hay competencias para este filtro.</p>';
+    renderRoadmap();
+  }
+  const ROADMAP_STAGES = [
+    { title: "Fundamentos de datos", caption: "Python, matemáticas, pipelines y análisis", ids: ["m0", "m1", "m2", "m3"] },
+    { title: "Machine Learning e ingeniería", caption: "Modelos, deep learning, software y despliegue", ids: ["m4", "m5", "m6", "m7", "m8"] },
+    { title: "AI Engineering", caption: "GenAI, RAG y agentes con evaluación", ids: ["m9", "m10", "m11"] },
+    { title: "Sistemas de producción", caption: "Fiabilidad, seguridad y diseño de sistemas", ids: ["m12", "m13"] },
+    { title: "Negocio e inglés", caption: "Habilidades transversales durante toda la ruta", ids: ["m14"] }
+  ];
+  function roadmapSummary() {
+    const items = MODULES.flatMap(allTopics).filter(t => !topicData(t.key).hidden);
+    const n = counts(items);
+    const next = items.find(t => t.priority === "CORE" && topicStatus(t.key) < 2) || items.find(t => topicStatus(t.key) < 3);
+    const stage = ROADMAP_STAGES.find(s => s.ids.some(id => MODULES.some(m => m.id === id && allTopics(m).some(t => !topicData(t.key).hidden && t.priority === "CORE" && topicStatus(t.key) < 2)))) || ROADMAP_STAGES[ROADMAP_STAGES.length - 1];
+    return { total: n.total, practiced: n.practiced, mastered: n.mastered, percent: n.total ? Math.round(n.weight / (n.total * 3) * 100) : 0, next: next ? topicData(next.key).label || next.title : "Consolidar evidencias", stage: stage.title };
+  }
+  function renderRoadmap() {
+    const target = document.getElementById("competencyRoadmap");
+    if (!target || !api) return;
+    const summary = roadmapSummary();
+    target.innerHTML = '<div class="tc-roadmap-intro"><div><span>Avance de la matriz</span><strong>' + summary.percent + '%</strong><small>' + summary.practiced + ' practicadas · ' + summary.mastered + ' dominadas · ' + summary.total + ' activas</small></div><div><span>Foco recomendado</span><strong>' + esc(summary.next) + '</strong><small>Etapa: ' + esc(summary.stage) + '</small></div><button type="button" data-go-view="habilidades">Actualizar Habilidades →</button></div>' +
+      '<div class="tc-roadmap-stages">' + ROADMAP_STAGES.map((stage, index) => {
+        const modules = stage.ids.map(id => MODULES.find(m => m.id === id)).filter(Boolean);
+        const topics = modules.flatMap(allTopics).filter(t => !topicData(t.key).hidden);
+        const c = counts(topics);
+        const pct = c.total ? Math.round(c.weight / (c.total * 3) * 100) : 0;
+        return '<article class="tc-roadmap-stage"><div class="tc-stage-head"><span>ETAPA ' + (index + 1) + '</span><h3>' + esc(stage.title) + '</h3><p>' + esc(stage.caption) + '</p><div class="tc-progress-track"><i style="width:' + pct + '%"></i></div><small>' + pct + '% · ' + c.practiced + ' practicadas / ' + c.total + ' competencias</small></div><div class="tc-stage-modules">' + modules.map(m => {
+          const mc = counts(allTopics(m));
+          const mp = mc.total ? Math.round(mc.weight / (mc.total * 3) * 100) : 0;
+          const next = allTopics(m).find(t => !topicData(t.key).hidden && t.priority === "CORE" && topicStatus(t.key) < 2);
+          return '<div class="tc-stage-module"><div><b>M' + m.id.slice(1).padStart(2, "0") + ' · ' + esc(m.title) + '</b><span>' + mp + '%</span></div><small>' + mc.practiced + ' practicadas · ' + mc.mastered + ' dominadas</small><p>' + (next ? 'Siguiente: ' + esc(topicData(next.key).label || next.title) : 'Siguiente: evidenciar dominio y aplicar el proyecto') + '</p><em>' + esc(m.sources) + '</em></div>';
+        }).join("") + '</div></article>';
+      }).join("") + '</div>';
+  }
+  function reviewDay() { return iso(new Date()); }
+  function reviewWeekStart(offset) { return sundayOf(addDays(dateAtNoon(reviewDay()), offset * 7)); }
+  function weeklyMetrics(start) {
+    const end = addDays(start, 7);
+    const days = Object.entries(state().daily || {}).filter(([key]) => { const d = dateAtNoon(key); return d >= start && d < end; }).map(([, day]) => day);
+    const hours = days.reduce((s, day) => s + (day.tasks || []).reduce((x, t) => x + (Number(t.actual) || 0), 0), 0);
+    const done = days.reduce((s, day) => s + (day.tasks || []).filter(t => t.done).length, 0);
+    const total = days.reduce((s, day) => s + (day.tasks || []).length, 0);
+    const from = iso(start), to = iso(end);
+    const changes = (state().competencyHistory || []).filter(e => { const day = e.day || (e.at || "").slice(0, 10); return day >= from && day < to; });
+    const practiced = changes.filter(e => e.from < 2 && e.to >= 2).length;
+    const mastered = changes.filter(e => e.from < 3 && e.to === 3).length;
+    return { hours: Math.round(hours * 10) / 10, done, total, practiced, mastered };
+  }
+  function renderReviews() {
+    if (!api) return;
+    const dailyRoot = document.getElementById("dailyReviewRoot");
+    if (dailyRoot) {
+      const key = reviewDay(); const review = (state().dailyReviews || {})[key] || {};
+      const day = (state().daily || {})[key] || {};
+      const tasks = day.tasks || [];
+      dailyRoot.innerHTML = '<div class="tc-review-metrics"><div><strong>' + tasks.filter(t => t.done).length + '/' + tasks.length + '</strong><span>Tareas completadas</span></div><div><strong>' + (Math.round(tasks.reduce((s, t) => s + (Number(t.actual) || 0), 0) * 10) / 10) + ' h</strong><span>Estudio registrado</span></div><div><strong>' + (day.focus || '—') + '/5</strong><span>Enfoque</span></div></div><div class="tc-review-fields"><label>¿Qué avancé hoy?<textarea data-daily-review="progress" placeholder="Resultado o evidencia concreta">' + esc(review.progress || '') + '</textarea></label><label>¿Qué me bloqueó o debo corregir?<textarea data-daily-review="blocker" placeholder="Una observación útil">' + esc(review.blocker || '') + '</textarea></label><label>Primera acción del próximo bloque<textarea data-daily-review="next" placeholder="Una acción clara y realizable">' + esc(review.next || '') + '</textarea></label></div><p class="tc-review-note">Cierre rápido: 3 respuestas y una decisión. Las métricas vienen de Plan diario.</p>';
+    }
+    const weeklyRoot = document.getElementById("weeklyReviewRoot");
+    if (weeklyRoot) {
+      const start = reviewWeekStart(reviewWeekOffset), key = iso(start);
+      const review = (state().weeklyReviews || {})[key] || {};
+      const metric = weeklyMetrics(start);
+      weeklyRoot.innerHTML = '<div class="tc-review-switch"><button type="button" data-review-week="-1"' + (reviewWeekOffset === -1 ? ' class="is-active"' : '') + '>Semana anterior</button><button type="button" data-review-week="0"' + (reviewWeekOffset === 0 ? ' class="is-active"' : '') + '>Semana actual</button></div><div class="tc-review-metrics"><div><strong>' + metric.hours + ' h</strong><span>Estudio registrado</span></div><div><strong>' + metric.done + '/' + metric.total + '</strong><span>Tareas completadas</span></div><div><strong>' + metric.practiced + '</strong><span>Nuevas competencias practicadas</span></div><div><strong>' + metric.mastered + '</strong><span>Nuevas competencias dominadas</span></div></div><div class="tc-review-fields"><label>Entregables y resultados<textarea data-weekly-review="results" placeholder="Qué quedó terminado y dónde está la evidencia">' + esc(review.results || '') + '</textarea></label><label>Aprendizaje más importante<textarea data-weekly-review="learning" placeholder="Qué ahora puedes explicar o aplicar">' + esc(review.learning || '') + '</textarea></label><label>Bloqueo y ajuste<textarea data-weekly-review="blocker" placeholder="Qué cambiarás para progresar">' + esc(review.blocker || '') + '</textarea></label><label>Prioridad para la próxima semana<textarea data-weekly-review="priority" placeholder="Competencia o entregable prioritario">' + esc(review.priority || '') + '</textarea></label><label>Carga y energía<textarea data-weekly-review="energy" placeholder="Qué mantener o reducir para sostener el ritmo">' + esc(review.energy || '') + '</textarea></label></div><p class="tc-review-note">El avance de competencias cuenta cambios realizados desde Habilidades. Los estados previos a esta versión permanecen intactos, pero no tienen historial retroactivo.</p>';
+    }
+  }
+  function initReviews() {
+    const dailyRoot = document.getElementById("dailyReviewRoot");
+    const weeklyRoot = document.getElementById("weeklyReviewRoot");
+    if (dailyRoot) dailyRoot.addEventListener("input", event => {
+      const field = event.target.dataset.dailyReview; if (!field) return;
+      const key = reviewDay(); const map = state().dailyReviews || (state().dailyReviews = {});
+      (map[key] || (map[key] = {}))[field] = event.target.value; api.save();
+    });
+    if (weeklyRoot) {
+      weeklyRoot.addEventListener("click", event => { const button = event.target.closest("[data-review-week]"); if (!button) return; reviewWeekOffset = Number(button.dataset.reviewWeek); renderReviews(); });
+      weeklyRoot.addEventListener("input", event => {
+        const field = event.target.dataset.weeklyReview; if (!field) return;
+        const key = iso(reviewWeekStart(reviewWeekOffset)); const map = state().weeklyReviews || (state().weeklyReviews = {});
+        (map[key] || (map[key] = {}))[field] = event.target.value; api.save();
+      });
+    }
+    renderReviews();
   }
   function initCompetencies() {
     root = document.getElementById("competencyRoot");
@@ -233,6 +316,7 @@
       if (event.target.matches("[data-topic-field]")) data[event.target.dataset.topicField] = event.target.value;
       if (event.target.matches("[data-master]")) data[event.target.dataset.master] = event.target.checked;
       if (event.target.matches("[data-topic-status]")) {
+        const before = topicStatus(key);
         const desired = Number(event.target.value);
         if (desired === 3 && !masteryReady(data)) {
           data.status = 2;
@@ -240,6 +324,11 @@
           event.target.value = "2";
           alert("Para marcar Dominado, registra una evidencia concreta y confirma que puedes explicarlo, aplicarlo y resolver un problema sin tutorial.");
         } else data.status = desired;
+        if (before !== data.status) {
+          const history = state().competencyHistory || (state().competencyHistory = []);
+          history.push({ key, from: before, to: data.status, day: iso(new Date()), at: new Date().toISOString() });
+          if (history.length > 3000) history.splice(0, history.length - 3000);
+        }
       }
       const lostMastery = data.status === 3 && !masteryReady(data);
       if (lostMastery) data.status = 2;
@@ -371,7 +460,9 @@
   }
 
   window.TrainerExtensions = {
-    init(config) { api = config; initCompetencies(); initCalendar(); },
-    render() { if (!api) return; renderCompetencies(); renderCalendar(); }
+    init(config) { api = config; initCompetencies(); initCalendar(); initReviews(); if (api.refreshDashboard) api.refreshDashboard(); },
+    render() { if (!api) return; renderCompetencies(); renderCalendar(); renderReviews(); },
+    refreshViews() { if (!api) return; renderRoadmap(); renderReviews(); },
+    summary() { return api ? roadmapSummary() : null; }
   };
 })();

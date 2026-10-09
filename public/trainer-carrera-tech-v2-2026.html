@@ -91,7 +91,6 @@
         <div class="nav-group" data-nav-group="estrategia">
           <button class="nav-button nav-primary" type="button" data-group-toggle="estrategia" aria-expanded="false">Estrategia<span class="nav-chevron" aria-hidden="true">›</span></button>
           <div class="nav-submenu"><div class="nav-submenu-inner">
-            <button class="nav-button nav-child" type="button" data-view="diagnostico">Diagnóstico</button>
             <button class="nav-button nav-child" type="button" data-view="top5">Rutas profesionales</button>
             <button class="nav-button nav-child" type="button" data-view="seleccion">Selección</button>
             <button class="nav-button nav-child" type="button" data-view="brechas">Brechas</button>
@@ -125,6 +124,7 @@
           <div class="nav-submenu"><div class="nav-submenu-inner">
             <button class="nav-button nav-child" type="button" data-view="empleabilidad">Empleabilidad</button>
             <button class="nav-button nav-child" type="button" data-view="certificaciones">Certificaciones</button>
+            <button class="nav-button nav-child" type="button" data-view="revision-diaria">Revisión diaria</button>
             <button class="nav-button nav-child" type="button" data-view="revision">Revisión semanal</button>
           </div></div>
         </div>
@@ -132,7 +132,7 @@
       <div class="sidebar-summary">
         <div class="sidebar-summary-head"><span>Progreso general</span><strong id="shellProgress">0%</strong></div>
         <span class="summary-track"><span class="summary-bar" id="shellProgressBar"></span></span>
-        <p id="shellSummary">Semana 1 · 0 horas registradas</p>
+        <p id="shellSummary">Ruta por competencias · 0 horas registradas</p>
       </div>
     </aside>
 
@@ -153,7 +153,6 @@
           <button class="shell-btn danger" id="resetBtn" type="button" aria-label="Reiniciar progreso" title="Reiniciar progreso">↺</button>
         </div>
         <div class="quick-menu" id="quickMenu" aria-label="Creación rápida">
-          <button type="button" data-quick="week"><span>Nueva semana</span><strong>Roadmap</strong></button>
           <button type="button" data-quick="project"><span>Nuevo proyecto</span><strong>Proyectos</strong></button>
           <button type="button" data-quick="skill"><span>Nueva habilidad</span><strong>Tracker</strong></button>
           <button type="button" data-quick="task"><span>Nueva tarea</span><strong>Hoy</strong></button>
@@ -187,7 +186,6 @@
     var selectedMonth=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
     var viewMap={
       inicio:{group:"Inicio",title:"Inicio",sections:[".hero","#v2-inicio-extra"]},
-      diagnostico:{group:"Estrategia",title:"Diagnóstico",sections:["#diagnostico"]},
       top5:{group:"Estrategia",title:"Rutas profesionales",sections:["#top5"]},
       seleccion:{group:"Estrategia",title:"Selección estratégica",sections:["#seleccion"]},
       brechas:{group:"Estrategia",title:"Brechas prioritarias",sections:["#gaps"]},
@@ -201,6 +199,7 @@
       lecturas:{group:"Productividad",title:"Lecturas",sections:["#lecturas"]},
       empleabilidad:{group:"Carrera",title:"Empleabilidad",sections:["#empleabilidad"],mode:"employ"},
       certificaciones:{group:"Carrera",title:"Certificaciones",sections:["#empleabilidad"],mode:"certifications"},
+      "revision-diaria":{group:"Carrera",title:"Revisión diaria",sections:["#revision-diaria"]},
       revision:{group:"Carrera",title:"Revisión semanal",sections:["#revision"]}
     };
 
@@ -220,7 +219,10 @@
         "body.v2-embedded main>section.v2-visible{display:block!important;}",
         "body.v2-embedded main>.hero.v2-visible{padding-top:46px!important;}",
         "body.v2-embedded .container{width:min(1180px,calc(100% - 40px));}",
-        "body.v2-embedded.v2-sources-mode #roadmap .allocation-card,body.v2-embedded.v2-sources-mode #roadmap .roadmap-timeline-card,body.v2-embedded.v2-sources-mode #roadmap #weekList{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap #competencyRoadmap{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap>.container>.section-head:first-child{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap #sourceHeading{display:flex!important;}",
+        "body.v2-embedded:not(.v2-sources-mode) #roadmap .program-grid,body.v2-embedded:not(.v2-sources-mode) #roadmap #addProgramBtn{display:none!important;}",
         "body.v2-embedded.v2-sources-mode #roadmap .program-grid{margin-top:0!important;}",
         "body.v2-embedded.v2-sources-mode #roadmap>.container>.section-head p{max-width:780px;}",
         "body.v2-embedded.v2-cert-mode #empleabilidad [data-employ-id]:not([data-employ-id='sql-cert']):not([data-employ-id='pbi-cert']):not([data-employ-id='ibm']){display:none!important;}",
@@ -338,25 +340,26 @@
       localStorage.setItem(ACTIVE_KEY,view);
       if(updateHash!==false&&location.hash!=="#"+view)history.replaceState(null,"","#"+view);
       document.body.classList.remove("nav-open");document.getElementById("quickMenu").classList.remove("is-open");
+      if(childWin.TrainerExtensions&&["roadmap","revision-diaria","revision"].includes(view))childWin.TrainerExtensions.refreshViews();
       if(view==="inicio")renderHome();if(view==="energia")renderEnergy();updateShell();
     }
 
     function renderHome(){
       if(!childDoc)return;var state=readState(),grid=childDoc.getElementById("v2HomeGrid");if(!grid)return;
-      var weeks=state.weeks||[];var current=weeks.find(function(w){return w.status==="in_progress"})||weeks.find(function(w){return w.status==="not_started"})||weeks[weeks.length-1];
+      var route=childWin.TrainerExtensions&&childWin.TrainerExtensions.summary();
       var today=new Date().toISOString().slice(0,10);var day=(state.daily||{})[today];var done=day&&day.tasks?day.tasks.filter(function(t){return t.done}).length:0;var total=day&&day.tasks?day.tasks.length:0;
       var project=(state.projects||[]).find(function(p){return p.status==="active"})||(state.projects||[])[0];
       var skill=(state.skills||[]).find(function(s){return Number(s.level)<Number(s.target)&&(!s.evidence||s.evidence.length<12)});
       var energy=energyScore(day);
       grid.innerHTML=[
-        homeCard("Siguiente foco",current?"Semana "+current.number+" · "+current.title:"Ciclo cerrado",current?current.goal:"Define el próximo ciclo.","roadmap","Abrir roadmap"),
+        homeCard("Siguiente foco",route?route.stage:"Ruta por competencias",route?route.next:"Abre Habilidades para definir tu siguiente competencia.","roadmap","Abrir roadmap"),
         homeCard("Hoy",done+" de "+total+" tareas",day?sumTasks(day.tasks,"actual")+" h reales":"Todavía sin registro.","plan-diario","Planificar el día"),
         homeCard("Proyecto activo",project?project.title:"Sin proyecto activo",project?project.summary:"Añade un proyecto y define su decisión.","home-credit","Abrir proyecto"),
         homeCard("Energía",energy+" / 100",day?"Sueño "+(day.sleep||0)+" h · enfoque "+(day.focus||0)+"/5":"Registra sueño, ejercicio y enfoque.","energia","Ver el mes"),
         homeCard("Habilidad sin evidencia",skill?skill.name:"Sin brecha urgente",skill?"Nivel "+skill.level+" → "+skill.target+" · "+skill.next:"Revisa el tracker.","habilidades","Abrir habilidades"),
         homeCard("Fuentes activas",(state.programs||[]).length+" fuentes","AnyoneAI y Futura mantienen la prioridad.","fuentes","Ver fuentes"),
         homeCard("Lecturas",(state.readings||[]).length+" registradas","Termina cada lectura con notas o aplicación.","lecturas","Abrir lecturas"),
-        homeCard("Revisión","Cierre semanal","Contrasta entregables, horas, energía y utilidad profesional.","revision","Revisar semana")
+        homeCard("Revisión","Cierre diario y semanal","Contrasta tareas, competencias y energía para reajustar la ruta.","revision-diaria","Revisar hoy")
       ].join("");
     }
 
@@ -400,12 +403,12 @@
     }
 
     function updateShell(){
-      if(!childDoc)return;var progress=Number((childDoc.querySelector("[data-global-progress]")||{}).textContent)||0;var hours=(childDoc.querySelector("[data-total-hours]")||{}).textContent||"0";var week=(childDoc.querySelector("[data-current-week]")||{}).textContent||"Semana 1";
-      document.getElementById("shellProgress").textContent=progress+"%";document.getElementById("shellProgressBar").style.width=progress+"%";document.getElementById("shellSummary").textContent=week+" · "+hours+" horas registradas";
+      if(!childDoc)return;var progress=Number((childDoc.querySelector("[data-global-progress]")||{}).textContent)||0;var hours=(childDoc.querySelector("[data-total-hours]")||{}).textContent||"0";var stage=(childDoc.querySelector("[data-current-week]")||{}).textContent||"Ruta por competencias";
+      document.getElementById("shellProgress").textContent=progress+"%";document.getElementById("shellProgressBar").style.width=progress+"%";document.getElementById("shellSummary").textContent=stage+" · "+hours+" horas registradas";
     }
 
     function performQuick(type){
-      var map={week:["roadmap","#addWeekBtn"],project:["proyectos-secundarios","#addProjectBtn"],skill:["habilidades","#addSkillBtn"],task:["plan-diario","#addDailyTaskBtn"],reading:["lecturas","#addReadingBtn"]},item=map[type];if(!item)return;
+      var map={project:["proyectos-secundarios","#addProjectBtn"],skill:["habilidades","#addSkillBtn"],task:["plan-diario","#addDailyTaskBtn"],reading:["lecturas","#addReadingBtn"]},item=map[type];if(!item)return;
       showView(item[0]);var button=childDoc.querySelector(item[1]);if(button)button.click();updateShell();
     }
 

@@ -86,7 +86,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
     @media print{@page{size:A4;margin:1.4cm}:root,:root[data-theme="dark"]{--bg:#fff;--card:#fff;--text:#000;--text-2:#333;--border:#bbb;--accent:#174ea6;--shadow:none}body{background:#fff;color:#000;font-size:9pt}.site-header,.no-print,.btn,.tabs,.toast{display:none!important}.container{width:100%}main{padding:0}section{margin-top:28px}.hero{padding:0}h1{font-size:28pt}.card,details.week,.project-card{box-shadow:none;break-inside:avoid}.tab-content{display:block!important}details.week .week-body{display:block!important}.table-responsive{overflow:visible}a{color:#000;text-decoration:none}}
   </style>
-  <link rel="stylesheet" href="trainer-extensions.css?v=20261009-quiz">
+  <link rel="stylesheet" href="trainer-extensions.css?v=20261009-roadmap">
 </head>
 <body>
   <header class="site-header">
@@ -109,15 +109,14 @@
     <section class="hero">
       <div class="container hero-grid">
         <div>
-          <div class="eyebrow">Centro unificado · <span data-current-date></span></div>
+          <div class="eyebrow">Centro unificado de carrera</div>
           <h1 class="editable" data-edit-key="hero.title">Tu entrenamiento profesional, en un solo sistema</h1>
           <p class="hero-copy editable" data-edit-key="hero.copy">Integra AnyoneAI, Futura, recursos puntuales de Coursera, un portafolio exigente y el cuidado de tu energía sin perder de vista la ruta hacia Decision Scientist / Data Scientist aplicado.</p>
           <div class="hero-meta">
             <span class="pill">Prioridad 1: AnyoneAI</span>
             <span class="pill">Prioridad 2: Futura</span>
             <span class="pill">Capacidad: <strong data-capacity-label>10 h/día</strong></span>
-            <span class="pill">Ciclo: 23 semanas</span>
-            <span class="pill">Estado: Sprint 2</span>
+            <span class="pill">Ruta flexible por competencias</span>
           </div>
         </div>
         <div class="hero-progress">
@@ -129,30 +128,13 @@
             <div class="gauge-center"><span class="gauge-value" data-global-progress>0</span><span class="gauge-label">Progreso / 100</span></div>
           </div>
           <div class="hero-stat-list">
-            <div class="hero-stat"><span>Semana operativa</span><strong data-current-week>Semana 1</strong></div>
+            <div class="hero-stat"><span>Etapa de aprendizaje</span><strong data-current-week>Fundamentos</strong></div>
             <div class="hero-stat"><span>Horas registradas</span><strong><span data-total-hours>0</span> h</strong></div>
             <div class="hero-stat"><span>Proyectos activos</span><strong><span data-active-projects>0</span></strong></div>
             <div class="hero-stat"><span>Evidencias de skills</span><strong><span data-demonstrated-skills>0</span></strong></div>
             <span class="bar-track"><span class="bar-fill" data-global-bar></span></span>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section id="diagnostico">
-      <div class="container">
-        <div class="section-head">
-          <div><div class="eyebrow">01 · Diagnóstico</div><h2 class="editable" data-edit-key="diagnostic.title">La brecha no es aprender más algoritmos</h2></div>
-          <p class="editable" data-edit-key="diagnostic.copy">Tu cuello de botella es transformar conocimiento parcial en rigor, reproducibilidad, criterio empresarial y comunicación profesional.</p>
-        </div>
-        <div class="card diagnostic-layout">
-          <div>
-            <div class="indicator-list" id="indicatorList"></div>
-            <p class="note">Indicadores orientativos basados en tus respuestas y evidencias descritas. No son una evaluación científica.</p>
-          </div>
-          <div class="radar-wrap"><canvas id="radarChart" aria-label="Radar del diagnóstico profesional" role="img"></canvas></div>
-        </div>
-        <div class="alert"><strong>Regla de evidencia:</strong> completar cursos y registrar horas no aumenta por sí solo el nivel. Una habilidad sube cuando existe un entregable auditable, una defensa o un uso real.</div>
       </div>
     </section>
 
@@ -180,7 +162,7 @@
         </div>
         <div class="card grid-4">
           <div class="strategy-item"><span class="badge">Prioridad 1</span><h3 class="editable" data-edit-key="strategy.anyone.title">AnyoneAI</h3><p class="editable" data-edit-key="strategy.anyone.copy">Columna vertebral de ingeniería de ML y proyecto final.</p><ul><li class="editable" data-edit-key="strategy.anyone.rule1">28 h/semana de referencia</li><li class="editable" data-edit-key="strategy.anyone.rule2">No duplicar contenidos</li><li class="editable" data-edit-key="strategy.anyone.rule3">Entregables primero</li></ul></div>
-          <div class="strategy-item"><span class="badge">Prioridad 2</span><h3 class="editable" data-edit-key="strategy.futura.title">Futura</h3><p class="editable" data-edit-key="strategy.futura.copy">Profundidad progresiva en Data Science hasta diciembre.</p><ul><li class="editable" data-edit-key="strategy.futura.rule1">20 h/semana</li><li class="editable" data-edit-key="strategy.futura.rule2">Conectar tareas a Home Credit</li><li class="editable" data-edit-key="strategy.futura.rule3">Consolidar estadística y EDA</li></ul></div>
+          <div class="strategy-item"><span class="badge">Prioridad 2</span><h3 class="editable" data-edit-key="strategy.futura.title">Futura</h3><p class="editable" data-edit-key="strategy.futura.copy">Profundidad progresiva en Data Science, conectada con las competencias de la ruta.</p><ul><li class="editable" data-edit-key="strategy.futura.rule1">20 h/semana</li><li class="editable" data-edit-key="strategy.futura.rule2">Conectar tareas a Home Credit</li><li class="editable" data-edit-key="strategy.futura.rule3">Consolidar estadística y EDA</li></ul></div>
           <div class="strategy-item"><span class="badge">Cobertura de brechas</span><h3 class="editable" data-edit-key="strategy.coursera.title">Coursera</h3><p class="editable" data-edit-key="strategy.coursera.copy">SQL Server, Power BI, inglés, negocio y comunicación.</p><ul><li class="editable" data-edit-key="strategy.coursera.rule1">7 h/semana máximo</li><li class="editable" data-edit-key="strategy.coursera.rule2">Cursos en inglés</li><li class="editable" data-edit-key="strategy.coursera.rule3">Certificados con señal laboral</li></ul></div>
           <div class="strategy-item"><span class="badge">Just in time</span><h3 class="editable" data-edit-key="strategy.udemy.title">Udemy</h3><p class="editable" data-edit-key="strategy.udemy.copy">Consultar módulos concretos cuando un proyecto los exija.</p><ul><li class="editable" data-edit-key="strategy.udemy.rule1">No seguir bootcamps completos ahora</li><li class="editable" data-edit-key="strategy.udemy.rule2">Priorizar probabilidad y estadística</li><li class="editable" data-edit-key="strategy.udemy.rule3">MLOps después de Sprint 4</li></ul></div>
         </div>
@@ -211,10 +193,12 @@
     <section id="roadmap">
       <div class="container">
         <div class="section-head">
-          <div><div class="eyebrow">05 · Roadmap editable</div><h2 class="editable" data-edit-key="roadmap.title">23 semanas: prioridad, integración y evidencia</h2></div>
-          <p class="editable" data-edit-key="roadmap.copy">El ciclo profesional principal dura cuatro meses; diciembre cierra Futura, documentación y salida al mercado. Cada semana puede editarse, replanificarse o eliminarse.</p>
+          <div><div class="eyebrow">Roadmap por competencias</div><h2 class="editable" data-edit-key="roadmap.title">De Data Science a AI Engineering</h2></div>
+          <p class="editable" data-edit-key="roadmap.copy">La matriz de Habilidades define la ruta. Cada cambio de estado y cada competencia personalizada actualiza este mapa automáticamente, sin plazos fijos.</p>
         </div>
-        <div class="card">
+        <div class="section-head" id="sourceHeading" style="display:none"><div><div class="eyebrow">Biblioteca de aprendizaje</div><h2>Fuentes de aprendizaje</h2></div><p>AnyoneAI y Futura sostienen la ruta; Coursera y Udemy cubren brechas concretas. Edita las fuentes sin añadir plazos al roadmap.</p></div>
+        <div id="competencyRoadmap"></div>
+        <div class="card allocation-card" style="display:none">
           <div class="allocation-grid">
             <div>
               <div class="field-grid" style="margin-bottom:18px">
@@ -233,14 +217,14 @@
         </div>
         <div class="program-grid" id="programGrid" style="margin-top:20px"></div>
         <div class="action-row no-print"><button class="btn btn-primary" id="addProgramBtn" type="button">Añadir fuente de aprendizaje</button></div>
-        <div class="card" style="margin-top:20px">
+        <div class="card roadmap-timeline-card" style="display:none">
           <div class="timeline" id="timeline"></div>
           <div class="action-row no-print">
             <button class="btn btn-primary" id="addWeekBtn" type="button">Añadir semana</button>
             <span class="inline-total">Planificadas: <strong id="roadmapPlanned">0 h</strong> · Registradas: <strong id="roadmapActual">0 h</strong></span>
           </div>
         </div>
-        <div class="week-list" id="weekList"></div>
+        <div class="week-list" id="weekList" style="display:none"></div>
       </div>
     </section>
 
@@ -335,13 +319,17 @@
       </div>
     </section>
 
+    <section id="revision-diaria">
+      <div class="container"><div class="section-head"><div><div class="eyebrow">Revisión diaria</div><h2>Un cierre breve, con siguiente acción</h2></div><p>Revisa lo que avanzaste, detecta un bloqueo y deja preparado el próximo bloque. Se guarda automáticamente.</p></div><div id="dailyReviewRoot"></div></div>
+    </section>
     <section id="revision">
       <div class="container">
         <div class="section-head">
-          <div><div class="eyebrow">11 · Revisión semanal</div><h2 class="editable" data-edit-key="review.title">Reajusta con evidencia, no con culpa</h2></div>
-          <p class="editable" data-edit-key="review.copy">Selecciona una semana. El formulario y todos los trackers se guardan automáticamente en este navegador.</p>
+          <div><div class="eyebrow">Revisión semanal</div><h2 class="editable" data-edit-key="review.title">Reajusta con evidencia, no con culpa</h2></div>
+          <p class="editable" data-edit-key="review.copy">Observa lo avanzado en la semana y decide qué continuar, corregir o simplificar. El registro se guarda automáticamente.</p>
         </div>
-        <div class="card review-grid">
+        <div id="weeklyReviewRoot"></div>
+        <div class="card review-grid" style="display:none">
           <div>
             <div class="field"><label for="reviewWeek">Semana</label><select class="control" id="reviewWeek"></select></div>
             <p class="note">Compara horas, entregables, energía y utilidad profesional. Si algo sobra, elimínalo.</p>
@@ -384,12 +372,12 @@
   <footer>
     <div class="container footer-inner">
       <p><strong>Trainer de Carrera Tech.</strong> Centro local editable: aprendizaje → proyectos → evidencias → energía → revisión → reajuste.</p>
-      <p><span data-current-date></span><br>Los datos se guardan en este navegador. Exporta una copia semanal; el archivo JSON permite restaurar todo el sistema.</p>
+      <p>Los datos se guardan en este navegador. Exporta una copia de seguridad; el archivo JSON permite restaurar todo el sistema.</p>
     </div>
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="trainer-extensions.js?v=20261009-quiz"></script>
+  <script src="trainer-extensions.js?v=20261009-roadmap"></script>
   <script>
   (function(){
     "use strict";
@@ -422,34 +410,10 @@
       "Dashboard, reporte técnico y presentación ejecutiva",
       "Documentación, entorno reproducible, entrega y defensa grabada"
     ];
-    var weeks=[
-      ["27 jul–2 ago","Sprint 2 + Futura","Evaluación reproducible","Cerrar la semana 2 de Sprint 2 y preparar Futura.","Métricas, partición, baseline y bitácora.",["Auditar el esquema de validación de Sprint 2","Crear baseline reproducible","Configurar calendario y repositorio de Futura"],70],
-      ["3–9 ago","Sprint 2","Model training & evaluation","Completar Sprint 2 con análisis de error.","CV, leakage, métricas y defensa.",["Cerrar entregables de Sprint 2","Defender la elección de métrica en inglés","Aplicar el esquema a Home Credit"],70],
-      ["10–16 ago","Sprint 3","Deep Learning foundations","Construir intuición y una implementación mínima.","Backprop, PyTorch/TensorFlow y experimentos.",["Completar semana 1 de Sprint 3","Futura: fundamentos Python","Registrar un experimento reproducible"],70],
-      ["17–23 ago","Sprint 3","Representaciones y redes","Comparar DL con un baseline clásico.","Arquitecturas, regularización y visualización.",["Completar semana 2 de Sprint 3","Futura: visualización y POO","Grabar explicación técnica de 5 minutos"],70],
-      ["24–30 ago","Sprint 3","GenAI con criterio","Cerrar Sprint 3 sin desviar la ruta principal.","Embeddings, evaluación y límites.",["Completar semana 3 de Sprint 3","Futura: scraping y APIs","Escribir memo: cuándo no usar GenAI"],70],
-      ["31 ago–6 sep","Sprint 4","Servicio de modelo","Exponer un modelo con contrato claro.","FastAPI, artefactos y manejo de errores.",["API mínima con validación","Futura: estadística descriptiva/inferencial","Pruebas de contrato"],70],
-      ["7–13 sep","Sprint 4","Contenedores y pruebas","Hacer reproducible el servicio.","Docker, pytest y pruebas de datos.",["Contenerizar servicio","Futura: reducción y clustering","Ejecutar test suite limpia"],70],
-      ["14–20 sep","Sprint 4","CI y monitoreo","Cerrar Sprint 4 con una ruta operable.","CI, logging, drift y rollback.",["Pipeline CI","Monitoreo mínimo","Futura: procesamiento de datos"],70],
-      ["21–27 sep","Final AnyoneAI","Discovery de proyecto final","Definir alcance, usuario y criterio de aceptación.","Problem framing y arquitectura.",["Aprobar brief del proyecto final","Plan de cinco semanas","Home Credit: integración relacional"],70],
-      ["28 sep–4 oct","Final AnyoneAI","Datos y features","Construir el pipeline de datos del proyecto final.","Calidad, features y pruebas.",["Pipeline del proyecto final","Futura: feature engineering y WOE","Home Credit: auditoría de calidad"],70],
-      ["5–11 oct","Final AnyoneAI","Baseline y EDA","Establecer referencia y comprender errores.","EDA, baseline y validación.",["Baseline auditable","Futura: EDA","Home Credit: EDA por hipótesis"],70],
-      ["12–18 oct","Final AnyoneAI","Modelado comparativo","Comparar modelos con el mismo protocolo.","Regresión, clasificación y trazabilidad.",["Experimentos comparables","Futura: regresión y clasificación","Memo de resultados"],70],
-      ["19–25 oct","Final AnyoneAI","Entrega y defensa","Cerrar el proyecto final con calidad profesional.","Documentación, demo y defensa.",["Entrega final AnyoneAI","Defensa grabada en inglés","Retrospectiva técnica"],70],
-      ["26 oct–1 nov","Home Credit","Baseline bancario","Convertir Home Credit en un proyecto de riesgo defendible.","Logística, LightGBM y CV.",["Pipeline baseline","Futura: segmentación y ensambles","Revisión externa de validación"],70],
-      ["2–8 nov","Home Credit","Interpretabilidad y error","Explicar el modelo y sus fallos.","SHAP, calibración y segmentos.",["Comparar árboles","Análisis SHAP","Futura: text mining / DL"],70],
-      ["9–15 nov","Home Credit","Optimización responsable","Cerrar modelo, umbral y análisis de impacto.","Tuning, ensemble y decisión.",["Tuning trazable","Curvas de ganancia y umbral","Documento de limitaciones"],70],
-      ["16–22 nov","Home Credit","Comunicación ejecutiva","Transformar resultados en una decisión comprensible.","Power BI, reporte y storytelling.",["Dashboard ejecutivo","Reporte técnico","Iniciar Microsoft Power BI"],70],
-      ["23–29 nov","Home Credit","Operación y publicación","Publicar un proyecto reproducible y defendible.","API, Docker, CI y README.",["Servicio o batch reproducible","README y video demo","Solicitar dos revisiones externas"],70],
-      ["30 nov–6 dic","Mercado + Futura","Paquete profesional","Convertir evidencia en CV, GitHub e historias de entrevista.","CV, STAR, inglés y casos.",["CV dirigido","Dos simulaciones en inglés","Cerrar pendientes Futura"],70],
-      ["7–13 dic","Complementarias","SQL Server y Power BI","Cubrir brechas sin duplicar fundamentos.","SQL analítico, modelo tabular y DAX.",["Proyecto SQL pequeño","Dashboard Power BI","Una publicación técnica"],70],
-      ["14–20 dic","Defensa","Portfolio review","Auditar los proyectos con la rúbrica 75/100.","Revisión, pruebas y comunicación.",["Evaluar los tres proyectos","Corregir brechas críticas","Presentación de portafolio"],70],
-      ["21–27 dic","Salida al mercado","Postulaciones y networking","Ejecutar una campaña dirigida y aprender del mercado.","Vacantes, mensajes y entrevistas.",["15 postulaciones dirigidas","5 conversaciones profesionales","Registrar tasa de respuesta"],70],
-      ["28–31 dic","Cierre Futura","Retrospectiva y plan siguiente","Cerrar Futura y decidir el siguiente trimestre.","Evidencias, métricas y decisiones.",["Entrega final Futura","Retrospectiva completa","Plan de 90 días"],40]
-    ].map(function(w,i){return{id:"week-"+(i+1),number:i+1,dates:w[0],phase:w[1],title:w[2],goal:w[3],focus:w[4],tasks:w[5].map(function(t,j){return{id:"w"+(i+1)+"t"+j,text:t,done:false}}),planned:w[6],actual:0,status:"not_started",evidence:"",blockers:"",notes:""}});
+    var weeks=[]; // Los registros semanales anteriores se conservan al cargar copias ya guardadas.
     var programs=[
-      {id:"anyone",name:"AnyoneAI · ML Engineer",priority:"Prioridad 1",summary:"Columna vertebral. Sprint 2 comenzó el 20 de julio.",modules:["Python and Math Refresher (opcional)","Sprint 1 · Data y pipelines","Sprint 2 · ML foundations, training y evaluation","Sprint 3 · Deep Learning y GenAI","Sprint 4 · Deployment","Final Project · 5 semanas"],done:[false,true,false,false,false,false]},
-      {id:"futura",name:"Futura · Data Science",priority:"Prioridad 2",summary:"1 de agosto a 31 de diciembre. Refuerza estadística, EDA y modelado.",modules:["Python, visualización y POO","Scraping y APIs","Estadística descriptiva e inferencial","Reducción, clustering y procesamiento","Feature engineering, WOE y EDA","Regresión, clasificación y segmentación","Ensambles, text mining y deep learning"],done:[false,false,false,false,false,false,false]},
+      {id:"anyone",name:"AnyoneAI · ML Engineer",priority:"Prioridad 1",summary:"Columna vertebral de ML Engineering y proyecto integrador.",modules:["Python and Math Refresher (opcional)","Sprint 1 · Data y pipelines","Sprint 2 · ML foundations, training y evaluation","Sprint 3 · Deep Learning y GenAI","Sprint 4 · Deployment","Final Project"],done:[false,true,false,false,false,false]},
+      {id:"futura",name:"Futura · Data Science",priority:"Prioridad 2",summary:"Refuerza estadística, EDA y modelado según las brechas de la matriz.",modules:["Python, visualización y POO","Scraping y APIs","Estadística descriptiva e inferencial","Reducción, clustering y procesamiento","Feature engineering, WOE y EDA","Regresión, clasificación y segmentación","Ensambles, text mining y deep learning"],done:[false,false,false,false,false,false,false]},
       {id:"coursera",name:"Coursera Plus",priority:"Brechas",summary:"Biblioteca en inglés. Elegir cursos por evidencia y señal laboral.",modules:["Microsoft SQL Server Professional Certificate","Microsoft Power BI Data Analyst Professional Certificate","Problem framing y storytelling","Inglés oral técnico","Gestión, ventas y negocio","IBM AI / ML certificates (opcionales)"],done:[false,false,false,false,false,false]},
       {id:"udemy",name:"Udemy",priority:"Just in time",summary:"No es otra especialización activa. Consultar módulos puntuales.",modules:["Probabilidad y estadística aplicada","MLOps después de Sprint 4","PyTorch o TensorFlow como referencia","GenAI, RAG, agentes y LLMOps después del ciclo principal"],done:[false,false,false,false]}
     ];
@@ -487,7 +451,7 @@
     ];
     var defaultState={
       version:2,created:"2026-07-27",capacity:{daily:10,days:7},texts:{},programs:programs,weeks:weeks,
-      projects:projects,skills:skills,employ:employ,readings:readings,daily:{},reviews:{},activeProjectTab:"main",competencies:{},customCompetencies:[],calendarEvents:[]
+      projects:projects,skills:skills,employ:employ,readings:readings,daily:{},reviews:{},dailyReviews:{},weeklyReviews:{},competencyHistory:[],activeProjectTab:"main",competencies:{},customCompetencies:[],calendarEvents:[]
     };
     var state=loadState();
     var charts={};
@@ -505,6 +469,13 @@
       if(!out.competencies||typeof out.competencies!=="object")out.competencies={};
       if(!Array.isArray(out.customCompetencies))out.customCompetencies=[];
       if(!Array.isArray(out.calendarEvents))out.calendarEvents=[];
+      if(!out.dailyReviews||typeof out.dailyReviews!=="object")out.dailyReviews={};
+      if(!out.weeklyReviews||typeof out.weeklyReviews!=="object")out.weeklyReviews={};
+      if(!Array.isArray(out.competencyHistory))out.competencyHistory=[];
+      out.programs.forEach(function(p){
+        if(p.id==="anyone"&&p.summary==="Columna vertebral. Sprint 2 comenzó el 20 de julio.")p.summary="Columna vertebral de ML Engineering y proyecto integrador.";
+        if(p.id==="futura"&&p.summary==="1 de agosto a 31 de diciembre. Refuerza estadística, EDA y modelado.")p.summary="Refuerza estadística, EDA y modelado según las brechas de la matriz.";
+      });
       return out;
     }
     function loadState(){try{return mergeDefaults(JSON.parse(localStorage.getItem(STORAGE_KEY)),defaultState)}catch(e){return clone(defaultState)}}
@@ -522,14 +493,7 @@
         if(!el.dataset.editBound){el.dataset.editBound="1";el.addEventListener("input",function(){state.texts[key]=el.textContent.trim();localStorage.setItem(STORAGE_KEY,JSON.stringify(state))})}
       });
     }
-    function renderIndicators(){
-      var values=[["Madurez técnica",48],["Rigor analítico",36],["Ingeniería y producción",12],["Ventaja sectorial",22],["Capacidad comercial",41],["Capacidad de gestión",31],["Capacidad de ejecución",50],["Empleabilidad",47],["Potencial emprendedor",18],["Alcance internacional",52]];
-      document.getElementById("indicatorList").innerHTML=values.map(function(x){return'<div class="indicator"><span>'+esc(x[0])+'</span><span class="bar-track"><span class="bar-fill" style="width:'+x[1]+'%"></span></span><strong>'+x[1]+'</strong></div>'}).join("");
-      if(typeof Chart!=="undefined"){
-        if(charts.radar)charts.radar.destroy();
-        charts.radar=new Chart(document.getElementById("radarChart"),{type:"radar",data:{labels:values.map(function(x){return x[0]}),datasets:[{label:"Diagnóstico",data:values.map(function(x){return x[1]}),borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.12)",pointBackgroundColor:"#2563eb",borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100,ticks:{display:false},grid:{color:"rgba(148,163,184,.2)"},pointLabels:{font:{size:9}}}},plugins:{legend:{display:false}}}});
-      }
-    }
+    function renderIndicators(){}
     function renderAllocation(){
       var weekly=state.capacity.daily*state.capacity.days;
       document.getElementById("dailyCapacity").value=state.capacity.daily;document.getElementById("studyDays").value=state.capacity.days;document.getElementById("weeklyCapacity").value=weekly+" h";
@@ -611,18 +575,19 @@
     }
     function sum(arr,key){return Math.round(arr.reduce(function(s,x){return s+(Number(x[key])||0)},0)*100)/100}
     function updateDashboard(){
-      var weekPct=state.weeks.length?state.weeks.reduce(function(s,w){return s+weekProgress(w)},0)/state.weeks.length:0;
+      var route=window.TrainerExtensions&&window.TrainerExtensions.summary();
+      var routePct=route?route.percent:0;
       var projectPct=state.projects.length?state.projects.reduce(function(s,p){var task=p.tasks.length?p.tasks.filter(function(t){return t.done}).length/p.tasks.length*100:0;return s+(task*.55+projectScore(p)*.45)},0)/state.projects.length:0;
       var skillPct=state.skills.length?state.skills.reduce(function(s,x){return s+clamp(x.level/(x.target||1),0,1)*100},0)/state.skills.length:0;
       var employPct=state.employ.length?state.employ.filter(function(e){return e.done}).length/state.employ.length*100:0;
       var readingPct=state.readings.length?state.readings.reduce(function(s,r){return s+(Number(r.progress)||0)},0)/state.readings.length:0;
       var d=ensureDay(currentDate),dailyPct=d.tasks.length?d.tasks.filter(function(t){return t.done}).length/d.tasks.length*100:0;
-      var overall=Math.round(weekPct*.30+projectPct*.25+skillPct*.20+employPct*.10+dailyPct*.10+readingPct*.05);
+      var overall=Math.round(routePct*.45+projectPct*.25+skillPct*.10+employPct*.10+dailyPct*.05+readingPct*.05);
       document.querySelector("[data-global-progress]").textContent=overall;document.querySelector("[data-global-gauge]").style.strokeDashoffset=465-(465*overall/100);document.querySelector("[data-global-bar]").style.width=overall+"%";
-      document.querySelector("[data-total-hours]").textContent=Math.round((sum(state.weeks,"actual")+sum(d.tasks,"actual"))*10)/10;
+      document.querySelector("[data-total-hours]").textContent=Math.round(Object.keys(state.daily).reduce(function(total,key){return total+sum(state.daily[key].tasks||[],"actual")},0)*10)/10;
       document.querySelector("[data-active-projects]").textContent=state.projects.filter(function(p){return p.status==="active"}).length;
       document.querySelector("[data-demonstrated-skills]").textContent=state.skills.filter(function(s){return s.status==="demonstrated"||s.status==="consolidated"}).length;
-      var current=state.weeks.find(function(w){return w.status==="in_progress"})||state.weeks.find(function(w){return w.status==="not_started"})||state.weeks[state.weeks.length-1];document.querySelector("[data-current-week]").textContent=current?"Semana "+current.number:"Ciclo cerrado";
+      document.querySelector("[data-current-week]").textContent=route?route.stage:"Ruta por competencias";
       document.getElementById("roadmapPlanned").textContent=sum(state.weeks,"planned")+" h";document.getElementById("roadmapActual").textContent=sum(state.weeks,"actual")+" h";
       var ep=Math.round(employPct);document.getElementById("employBar").style.width=ep+"%";document.getElementById("employPercent").textContent=ep+"%";updateDailyMetrics();
     }
@@ -696,7 +661,7 @@
     }
     document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||"light";
     bindTabs();bindPrograms();bindWeeks();bindProjects();bindSkills();bindDaily();bindReadings();bindEmploy();bindReview();bindHeader();renderAll();
-    if(window.TrainerExtensions)window.TrainerExtensions.init({getState:function(){return state},save:saveState,isoDate:isoDate});
+    if(window.TrainerExtensions)window.TrainerExtensions.init({getState:function(){return state},save:saveState,isoDate:isoDate,refreshDashboard:updateDashboard});
   })();
   </script>
 </body>
