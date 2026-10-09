@@ -1,4 +1,4 @@
-/* Matriz de competencias y revisiones de la ruta flexible. */
+/* Matriz de competencias, revisiones y fecha local actual. */
 (function () {
   "use strict";
 
@@ -146,6 +146,7 @@
   let root;
   let calendarRoot;
   let weekStart;
+  let calendarAutoFollow = true;
   let search = "";
   let filter = "all";
   let showHidden = false;
@@ -272,7 +273,8 @@
       const key = reviewDay(); const review = (state().dailyReviews || {})[key] || {};
       const day = (state().daily || {})[key] || {};
       const tasks = day.tasks || [];
-      dailyRoot.innerHTML = '<div class="tc-review-metrics"><div><strong>' + tasks.filter(t => t.done).length + '/' + tasks.length + '</strong><span>Tareas completadas</span></div><div><strong>' + (Math.round(tasks.reduce((s, t) => s + (Number(t.actual) || 0), 0) * 10) / 10) + ' h</strong><span>Estudio registrado</span></div><div><strong>' + (day.focus || '—') + '/5</strong><span>Enfoque</span></div></div><div class="tc-review-fields"><label>¿Qué avancé hoy?<textarea data-daily-review="progress" placeholder="Resultado o evidencia concreta">' + esc(review.progress || '') + '</textarea></label><label>¿Qué me bloqueó o debo corregir?<textarea data-daily-review="blocker" placeholder="Una observación útil">' + esc(review.blocker || '') + '</textarea></label><label>Primera acción del próximo bloque<textarea data-daily-review="next" placeholder="Una acción clara y realizable">' + esc(review.next || '') + '</textarea></label></div><p class="tc-review-note">Cierre rápido: 3 respuestas y una decisión. Las métricas vienen de Plan diario.</p>';
+      const todayLabel = new Intl.DateTimeFormat("es-PE", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+      dailyRoot.innerHTML = '<p class="tc-review-date">Hoy · ' + esc(todayLabel) + '</p><div class="tc-review-metrics"><div><strong>' + tasks.filter(t => t.done).length + '/' + tasks.length + '</strong><span>Tareas completadas</span></div><div><strong>' + (Math.round(tasks.reduce((s, t) => s + (Number(t.actual) || 0), 0) * 10) / 10) + ' h</strong><span>Estudio registrado</span></div><div><strong>' + (day.focus || '—') + '/5</strong><span>Enfoque</span></div></div><div class="tc-review-fields"><label>¿Qué avancé hoy?<textarea data-daily-review="progress" placeholder="Resultado o evidencia concreta">' + esc(review.progress || '') + '</textarea></label><label>¿Qué me bloqueó o debo corregir?<textarea data-daily-review="blocker" placeholder="Una observación útil">' + esc(review.blocker || '') + '</textarea></label><label>Primera acción del próximo bloque<textarea data-daily-review="next" placeholder="Una acción clara y realizable">' + esc(review.next || '') + '</textarea></label></div><p class="tc-review-note">Cierre rápido: 3 respuestas y una decisión. Las métricas vienen de Plan diario.</p>';
     }
     const weeklyRoot = document.getElementById("weeklyReviewRoot");
     if (weeklyRoot) {
@@ -429,12 +431,12 @@
       '<dialog class="tc-dialog" id="tcEventDialog"><form method="dialog" id="tcEventForm"><div class="tc-dialog-head"><h3 id="tcDialogTitle">Nuevo bloque</h3><button type="button" id="tcCloseDialog" aria-label="Cerrar">×</button></div><input name="id" type="hidden"><label>Actividad<input name="title" maxlength="100" required placeholder="Ej. AnyoneAI: evaluación de modelos"></label><div class="tc-dialog-grid"><label>Fecha<input name="date" type="date" required></label><label>Categoría<select name="category">' + CATEGORIES.map(c => '<option>' + esc(c) + '</option>').join("") + '</select></label><label>Inicio<input name="start" type="time" required></label><label>Fin<input name="end" type="time" required></label></div><label class="tc-repeat"><input name="repeat" type="checkbox"> Repetir cada semana desde esta fecha</label><label>Nota breve<textarea name="notes" rows="2" placeholder="Objetivo o resultado esperado"></textarea></label><div class="tc-dialog-actions"><button type="button" class="tc-delete" id="tcDeleteEvent">Eliminar</button><button type="submit" class="tc-save">Guardar bloque</button></div></form></dialog>';
     calendarRoot.addEventListener("click", event => {
       const nav = event.target.closest("[data-calendar-nav]");
-      if (nav) { const action = nav.dataset.calendarNav; weekStart = action === "today" ? sundayOf(new Date()) : addDays(weekStart, action === "prev" ? -7 : 7); renderCalendar(); return; }
+      if (nav) { const action = nav.dataset.calendarNav; calendarAutoFollow = action === "today"; weekStart = action === "today" ? sundayOf(dateAtNoon(iso(new Date()))) : addDays(weekStart, action === "prev" ? -7 : 7); renderCalendar(); return; }
       if (event.target.closest("#tcAddEvent")) { openEvent(null, iso(new Date()), "08:30"); return; }
       const eventButton = event.target.closest("[data-event]");
       if (eventButton) { openEvent(state().calendarEvents.find(x => x.id === eventButton.dataset.event)); return; }
       const dayHead = event.target.closest("[data-select-date]");
-      if (dayHead) { const planner = document.getElementById("plannerDate"); planner.value = dayHead.dataset.selectDate; planner.dispatchEvent(new Event("change", { bubbles: true })); return; }
+      if (dayHead) { if (dayHead.dataset.selectDate !== iso(new Date())) calendarAutoFollow = false; const planner = document.getElementById("plannerDate"); planner.value = dayHead.dataset.selectDate; planner.dispatchEvent(new Event("change", { bubbles: true })); return; }
       const col = event.target.closest("[data-calendar-date]");
       if (col) { const rect = col.getBoundingClientRect(); const y = event.clientY - rect.top; const minutes = Math.max(START_HOUR * 60, Math.min(END_HOUR * 60 - 60, START_HOUR * 60 + Math.floor(y / (HOUR_HEIGHT / 2)) * 30)); openEvent(null, col.dataset.calendarDate, minutesToTime(minutes)); }
     });
@@ -466,6 +468,7 @@
     init(config) { api = config; initCompetencies(); initCalendar(); initReviews(); if (api.refreshDashboard) api.refreshDashboard(); },
     render() { if (!api) return; renderCompetencies(); renderCalendar(); renderReviews(); },
     refreshViews() { if (!api) return; renderRoadmap(); renderReviews(); },
+    onLocalDateChange() { if (!api) return; if (calendarAutoFollow) weekStart = sundayOf(dateAtNoon(iso(new Date()))); renderCalendar(); renderReviews(); },
     summary() { return api ? roadmapSummary() : null; }
   };
 })();

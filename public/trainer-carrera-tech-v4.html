@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trainer de Carrera Tech v2: centro de aprendizaje, proyectos, productividad y carrera organizado por pestañas">
+  <title>Trainer de Carrera Tech v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f8fc;--surface:#fff;--surface-2:#f8fafc;--text:#0f172a;--muted:#64748b;
+      --muted-2:#94a3b8;--border:#e2e8f0;--accent:#2563eb;--accent-soft:#eff6ff;
+      --green:#16a34a;--amber:#d97706;--red:#dc2626;--shadow:0 10px 30px rgba(15,23,42,.08);
+      --sidebar:268px;--topbar:72px
+    }
+    :root[data-theme="dark"]{
+      --bg:#09090b;--surface:#171717;--surface-2:#111113;--text:#fafafa;--muted:#a1a1aa;
+      --muted-2:#71717a;--border:#29292d;--accent:#3b82f6;--accent-soft:rgba(59,130,246,.13);
+      --green:#22c55e;--amber:#f59e0b;--red:#ef4444;--shadow:0 10px 30px rgba(0,0,0,.28)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;overflow:hidden}
+    body{background:var(--bg);color:var(--text);font:400 14px/1.5 "Plus Jakarta Sans",system-ui,sans-serif}
+    button,input{font:inherit}
+    button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 38%,transparent);outline-offset:2px}
+    .app{min-height:100vh}
+    .sidebar{
+      position:fixed;inset:0 auto 0 0;z-index:80;width:var(--sidebar);display:flex;flex-direction:column;
+      border-right:1px solid var(--border);background:var(--surface)
+    }
+    .brand{display:flex;align-items:center;gap:11px;min-height:var(--topbar);padding:0 20px;border-bottom:1px solid var(--border)}
+    .brand-mark{display:grid;width:34px;height:34px;place-items:center;border-radius:9px;background:var(--accent);color:#fff;font-size:12px;font-weight:800}
+    .brand-copy strong{display:block;font-size:13px;letter-spacing:-.02em}.brand-copy span{display:block;color:var(--muted);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    .nav-scroll{flex:1;overflow:auto;padding:14px 12px 24px;scrollbar-width:thin}
+    .nav-group+.nav-group{margin-top:4px}
+    .nav-button{position:relative;display:flex;width:100%;min-height:42px;align-items:center;padding:9px 11px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;text-align:left;font-size:11px;font-weight:700;transition:.18s}
+    .nav-button:hover{background:var(--surface-2);color:var(--text)}.nav-button.is-active{background:var(--accent-soft);color:var(--accent)}
+    .nav-button.is-active::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:99px;background:var(--accent)}
+    .nav-primary{justify-content:space-between;color:var(--text);font-size:11px;font-weight:800;letter-spacing:.075em;text-transform:uppercase}
+    .nav-primary.is-active{color:var(--accent)}.nav-primary.is-active::before{display:none}
+    .nav-group.is-open .nav-primary{background:var(--surface-2)}.nav-group.has-active .nav-primary{background:var(--accent-soft);color:var(--accent)}
+    .nav-chevron{color:var(--muted-2);font-size:14px;line-height:1;transition:transform .18s}.nav-group.is-open .nav-chevron{transform:rotate(90deg)}
+    .nav-submenu{display:grid;grid-template-rows:0fr;transition:grid-template-rows .2s ease}.nav-submenu-inner{min-height:0;overflow:hidden}
+    .nav-group.is-open .nav-submenu{grid-template-rows:1fr}
+    .nav-child{min-height:36px;margin:2px 0;padding:7px 12px 7px 25px;font-size:10px;font-weight:650}
+    .nav-child::after{content:"";position:absolute;left:13px;top:50%;width:4px;height:4px;border-radius:50%;background:var(--border);transform:translateY(-50%)}
+    .nav-child.is-active::after{background:var(--accent)}.nav-child.is-active::before{display:none}
+    .sidebar-summary{padding:15px 16px;border-top:1px solid var(--border);background:var(--surface-2)}
+    .sidebar-summary-head{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase}
+    .summary-track{height:6px;margin:8px 0 7px;overflow:hidden;border-radius:99px;background:var(--border)}.summary-bar{display:block;width:0;height:100%;border-radius:99px;background:var(--accent);transition:width .3s}
+    .sidebar-summary p{margin:0;color:var(--muted);font-size:10px}
+    .content{height:100vh;margin-left:var(--sidebar);display:grid;grid-template-rows:var(--topbar) minmax(0,1fr)}
+    .topbar{z-index:60;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 22px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px)}
+    .topbar-left{display:flex;align-items:center;gap:12px;min-width:0}.shell-btn.menu-button{display:none}
+    .breadcrumbs{min-width:0}.breadcrumbs span{display:block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.breadcrumbs strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:17px;letter-spacing:-.025em}
+    .top-actions{display:flex;align-items:center;gap:7px}
+    .shell-btn{display:inline-flex;min-height:38px;align-items:center;justify-content:center;gap:7px;padding:7px 11px;border:1px solid var(--border);border-radius:7px;background:var(--surface);color:var(--text);cursor:pointer;font-size:10px;font-weight:800;transition:.18s}
+    .shell-btn:hover{border-color:var(--accent);transform:translateY(-1px)}.shell-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.shell-btn.danger{color:var(--red)}
+    .workspace{position:relative;min-height:0;background:var(--bg)}#trainerFrame{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+    .loading{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:var(--bg);transition:opacity .25s}.loading.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .loading-card{width:min(430px,calc(100% - 40px));padding:30px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--shadow)}
+    .loading-card strong{display:block;font-size:18px}.loading-card p{margin:7px 0 0;color:var(--muted);font-size:12px}.loading-line{height:6px;margin-top:18px;overflow:hidden;border-radius:99px;background:var(--border)}.loading-line span{display:block;width:42%;height:100%;border-radius:99px;background:var(--accent);animation:load 1.25s ease-in-out infinite alternate}
+    @keyframes load{to{width:92%;transform:translateX(8%)}}
+    .quick-menu{position:absolute;z-index:120;top:60px;right:175px;width:220px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:translateY(-6px);transition:.16s}.quick-menu.is-open{opacity:1;visibility:visible;transform:translateY(0)}
+    .quick-menu button{display:flex;width:100%;align-items:center;justify-content:space-between;padding:9px 10px;border:0;border-radius:6px;background:transparent;color:var(--text);cursor:pointer;text-align:left;font-size:11px;font-weight:700}.quick-menu button:hover{background:var(--accent-soft);color:var(--accent)}
+    .backdrop{display:none}
+    .error-panel{display:none;position:absolute;inset:0;z-index:30;place-items:center;padding:20px;background:var(--bg)}.error-panel.is-visible{display:grid}.error-card{max-width:560px;padding:30px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:var(--shadow)}.error-card h2{margin:0 0 10px}.error-card p{color:var(--muted)}
+    @media(max-width:1300px){.action-label{display:none}.quick-menu{right:118px}}
+    @media(max-width:780px){
+      :root{--topbar:66px}.sidebar{width:min(310px,88vw);transform:translateX(-102%);box-shadow:var(--shadow);transition:transform .22s}.nav-open .sidebar{transform:translateX(0)}
+      .backdrop{position:fixed;inset:0;z-index:70;background:rgba(15,23,42,.44)}.nav-open .backdrop{display:block}.content{margin-left:0}.shell-btn.menu-button{display:inline-flex}
+      .topbar{padding:0 12px}.top-actions{gap:5px}.shell-btn{min-width:36px;padding:6px 9px}.quick-menu{top:58px;right:54px}.breadcrumbs strong{font-size:14px}
+    }
+    @media(max-width:480px){.top-actions .optional-action{display:none}.quick-menu{right:12px}.breadcrumbs{max-width:150px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="brand">
+        <span class="brand-mark">T2</span>
+        <span class="brand-copy"><strong>Trainer de Carrera Tech</strong><span>Versión 2 · Centro operativo</span></span>
+      </div>
+      <nav class="nav-scroll" id="mainNav">
+        <div class="nav-group">
+          <button class="nav-button nav-primary is-active" type="button" data-view="inicio">Inicio</button>
+        </div>
+        <div class="nav-group" data-nav-group="estrategia">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="estrategia" aria-expanded="false">Estrategia<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="top5">Rutas profesionales</button>
+            <button class="nav-button nav-child" type="button" data-view="seleccion">Selección</button>
+            <button class="nav-button nav-child" type="button" data-view="brechas">Brechas</button>
+          </div></div>
+        </div>
+        <div class="nav-group" data-nav-group="aprendizaje">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="aprendizaje" aria-expanded="false">Aprendizaje<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="habilidades">Habilidades</button>
+            <button class="nav-button nav-child" type="button" data-view="roadmap">Roadmap</button>
+            <button class="nav-button nav-child" type="button" data-view="fuentes">Fuentes de aprendizaje</button>
+          </div></div>
+        </div>
+        <div class="nav-group" data-nav-group="proyectos">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="proyectos" aria-expanded="false">Proyectos<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="home-credit">Proyecto principal</button>
+            <button class="nav-button nav-child" type="button" data-view="proyectos-secundarios">Proyectos secundarios</button>
+          </div></div>
+        </div>
+        <div class="nav-group" data-nav-group="productividad">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="productividad" aria-expanded="false">Productividad<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="plan-diario">Plan diario</button>
+            <button class="nav-button nav-child" type="button" data-view="energia">Energía mensual</button>
+            <button class="nav-button nav-child" type="button" data-view="lecturas">Lecturas</button>
+          </div></div>
+        </div>
+        <div class="nav-group" data-nav-group="carrera">
+          <button class="nav-button nav-primary" type="button" data-group-toggle="carrera" aria-expanded="false">Carrera<span class="nav-chevron" aria-hidden="true">›</span></button>
+          <div class="nav-submenu"><div class="nav-submenu-inner">
+            <button class="nav-button nav-child" type="button" data-view="empleabilidad">Empleabilidad</button>
+            <button class="nav-button nav-child" type="button" data-view="certificaciones">Certificaciones</button>
+            <button class="nav-button nav-child" type="button" data-view="revision-diaria">Revisión diaria</button>
+            <button class="nav-button nav-child" type="button" data-view="revision">Revisión semanal</button>
+          </div></div>
+        </div>
+      </nav>
+      <div class="sidebar-summary">
+        <div class="sidebar-summary-head"><span>Progreso general</span><strong id="shellProgress">0%</strong></div>
+        <span class="summary-track"><span class="summary-bar" id="shellProgressBar"></span></span>
+        <p id="shellSummary">Ruta por competencias · 0 horas registradas</p>
+      </div>
+    </aside>
+
+    <div class="backdrop" id="backdrop"></div>
+
+    <div class="content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="shell-btn menu-button" id="menuBtn" type="button" aria-label="Abrir navegación">☰</button>
+          <div class="breadcrumbs"><span id="groupLabel">Inicio</span><strong id="viewTitle">Inicio</strong></div>
+        </div>
+        <div class="top-actions">
+          <button class="shell-btn primary" id="quickAddBtn" type="button" aria-label="Añadir un elemento" title="Añadir"><span>＋</span><span class="action-label">Añadir</span></button>
+          <button class="shell-btn" id="editBtn" type="button" aria-label="Editar textos" title="Editar textos"><span>✎</span><span class="action-label">Editar</span></button>
+          <button class="shell-btn" id="themeBtn" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+          <button class="shell-btn optional-action" id="exportBtn" type="button" aria-label="Exportar progreso" title="Exportar progreso"><span>↓</span><span class="action-label">Exportar</span></button>
+          <button class="shell-btn optional-action" id="importBtn" type="button" aria-label="Importar progreso" title="Importar progreso"><span>↑</span><span class="action-label">Importar</span></button>
+          <button class="shell-btn danger" id="resetBtn" type="button" aria-label="Reiniciar progreso" title="Reiniciar progreso">↺</button>
+        </div>
+        <div class="quick-menu" id="quickMenu" aria-label="Creación rápida">
+          <button type="button" data-quick="project"><span>Nuevo proyecto</span><strong>Proyectos</strong></button>
+          <button type="button" data-quick="skill"><span>Nueva habilidad</span><strong>Tracker</strong></button>
+          <button type="button" data-quick="task"><span>Nueva tarea</span><strong>Hoy</strong></button>
+          <button type="button" data-quick="reading"><span>Nueva lectura</span><strong>Biblioteca</strong></button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <div class="loading" id="loading">
+          <div class="loading-card"><strong>Preparando tu centro de carrera</strong><p>Organizando estrategia, aprendizaje, proyectos y productividad.</p><div class="loading-line"><span></span></div></div>
+        </div>
+        <div class="error-panel" id="errorPanel"><div class="error-card"><h2>No fue posible cargar el contenido base</h2><p>Abre esta página desde el servidor local del workspace para conservar todas las funciones editables.</p></div></div>
+        <iframe id="trainerFrame" title="Contenido editable del Trainer de Carrera Tech v2"></iframe>
+      </main>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    "use strict";
+    var BASE_FILE="trainer-carrera-tech-base-v4.html";
+    var STATE_KEY="tech-career-trainer-v2";
+    var THEME_KEY="tech-career-trainer-v2-theme";
+    var SHELL_THEME_KEY="tech-career-trainer-v2-shell-theme";
+    var ACTIVE_KEY="tech-career-trainer-v2-active-view";
+    var frame=document.getElementById("trainerFrame");
+    var childDoc=null;
+    var childWin=null;
+    var activeView="inicio";
+    var energyCharts={sleep:null,hours:null};
+    var selectedMonth=new Date().getFullYear()+"-"+String(new Date().getMonth()+1).padStart(2,"0");
+    var selectedMonthManual=false;
+    var viewMap={
+      inicio:{group:"Inicio",title:"Inicio",sections:[".hero","#v2-inicio-extra"]},
+      top5:{group:"Estrategia",title:"Rutas profesionales",sections:["#top5"]},
+      seleccion:{group:"Estrategia",title:"Selección estratégica",sections:["#seleccion"]},
+      brechas:{group:"Estrategia",title:"Brechas prioritarias",sections:["#gaps"]},
+      habilidades:{group:"Aprendizaje",title:"Habilidades",sections:["#tracker"]},
+      roadmap:{group:"Aprendizaje",title:"Roadmap",sections:["#roadmap"],mode:"roadmap"},
+      fuentes:{group:"Aprendizaje",title:"Fuentes de aprendizaje",sections:["#roadmap"],mode:"sources"},
+      "home-credit":{group:"Proyectos",title:"Proyecto principal",sections:["#proyectos"],mode:"projects-main"},
+      "proyectos-secundarios":{group:"Proyectos",title:"Proyectos secundarios",sections:["#proyectos"],mode:"projects-secondary"},
+      "plan-diario":{group:"Productividad",title:"Plan diario",sections:["#plan-diario"]},
+      energia:{group:"Productividad",title:"Energía mensual",sections:["#v2-energy-analytics"]},
+      lecturas:{group:"Productividad",title:"Lecturas",sections:["#lecturas"]},
+      empleabilidad:{group:"Carrera",title:"Empleabilidad",sections:["#empleabilidad"],mode:"employ"},
+      certificaciones:{group:"Carrera",title:"Certificaciones",sections:["#empleabilidad"],mode:"certifications"},
+      "revision-diaria":{group:"Carrera",title:"Revisión diaria",sections:["#revision-diaria"]},
+      revision:{group:"Carrera",title:"Revisión semanal",sections:["#revision"]}
+    };
+
+    function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+    function localDateKey(date){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0")}
+    function clamp(value,min,max){return Math.min(max,Math.max(min,Number(value)||0))}
+    function readState(){try{return JSON.parse(localStorage.getItem(STATE_KEY))||{}}catch(e){return{}}}
+    function sumTasks(tasks,key){return (tasks||[]).reduce(function(total,item){return total+(Number(item[key])||0)},0)}
+    function energyScore(day){if(!day)return 0;return Math.round(clamp(day.sleep/7,0,1)*35+clamp(day.exercise/30,0,1)*20+clamp(day.focus/5,0,1)*30+(day.badHabitFree?15:0))}
+
+    function childStyles(){
+      return[
+        "html,body{height:100%;}",
+        "body.v2-embedded{min-height:100%;overflow-y:auto;background:var(--bg);}",
+        "body.v2-embedded .site-header,body.v2-embedded footer{display:none!important;}",
+        "body.v2-embedded main{padding:0 0 60px!important;}",
+        "body.v2-embedded main>section{display:none;margin:0!important;padding:42px 0 24px!important;}",
+        "body.v2-embedded main>section.v2-visible{display:block!important;}",
+        "body.v2-embedded main>.hero.v2-visible{padding-top:46px!important;}",
+        "body.v2-embedded .container{width:min(1180px,calc(100% - 40px));}",
+        "body.v2-embedded.v2-sources-mode #roadmap #competencyRoadmap{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap>.container>.section-head:first-child{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap #sourceHeading{display:flex!important;}",
+        "body.v2-embedded:not(.v2-sources-mode) #roadmap .program-grid,body.v2-embedded:not(.v2-sources-mode) #roadmap #addProgramBtn{display:none!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap .program-grid{margin-top:0!important;}",
+        "body.v2-embedded.v2-sources-mode #roadmap>.container>.section-head p{max-width:780px;}",
+        "body.v2-embedded.v2-cert-mode #empleabilidad [data-employ-id]:not([data-employ-id='sql-cert']):not([data-employ-id='pbi-cert']):not([data-employ-id='ibm']){display:none!important;}",
+        "body.v2-embedded.v2-employ-mode #empleabilidad [data-employ-id='sql-cert'],body.v2-embedded.v2-employ-mode #empleabilidad [data-employ-id='pbi-cert'],body.v2-embedded.v2-employ-mode #empleabilidad [data-employ-id='ibm']{display:none!important;}",
+        "body.v2-embedded #v2-inicio-extra{padding-top:0!important;}",
+        ".v2-home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;}",
+        ".v2-home-card{padding:22px;border:1px solid var(--border);border-radius:8px;background:var(--card);box-shadow:var(--shadow);}",
+        ".v2-home-card span{display:block;color:var(--text-2);font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}",
+        ".v2-home-card strong{display:block;margin:7px 0 5px;font-size:18px;line-height:1.25;}",
+        ".v2-home-card p{margin:0;color:var(--text-2);font-size:11px;}",
+        ".v2-home-card button,.v2-energy-actions button{margin-top:14px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--accent);cursor:pointer;font:800 10px 'Plus Jakarta Sans';}",
+        ".v2-energy-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:24px;}",
+        ".v2-energy-head input{min-height:40px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font:700 12px 'Plus Jakarta Sans';}",
+        ".v2-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px;}",
+        ".v2-kpi{padding:20px;border:1px solid var(--border);border-radius:8px;background:var(--card);}",
+        ".v2-kpi span{display:block;color:var(--text-2);font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}",
+        ".v2-kpi strong{display:block;margin-top:6px;font-size:28px;line-height:1;}",
+        ".v2-kpi small{display:block;margin-top:6px;color:var(--text-2);font-size:10px;}",
+        ".v2-chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}",
+        ".v2-chart-card{height:330px;padding:20px;border:1px solid var(--border);border-radius:8px;background:var(--card);}",
+        ".v2-chart-card h3{font-size:15px;}.v2-chart-wrap{height:250px;}",
+        ".v2-energy-note{margin-top:18px;padding:14px 16px;border-left:3px solid var(--accent);background:var(--soft);color:var(--text-2);font-size:11px;}",
+        "@media(max-width:900px){.v2-home-grid,.v2-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.v2-chart-grid{grid-template-columns:1fr;}}",
+        "@media(max-width:620px){body.v2-embedded main>section{padding-top:28px!important}.v2-home-grid,.v2-kpis{grid-template-columns:1fr}.v2-energy-head{display:block}.v2-energy-head input{margin-top:12px}.v2-chart-card{height:300px}.v2-chart-wrap{height:220px;}}"
+      ].join("\n");
+    }
+
+    function injectCustomViews(){
+      var main=childDoc.querySelector("main");
+      if(!main)return;
+      var style=childDoc.createElement("style");style.id="v2-shell-styles";style.textContent=childStyles();childDoc.head.appendChild(style);
+      childDoc.body.classList.add("v2-embedded");
+      var roadmap=childDoc.getElementById("roadmap");
+      if(roadmap){
+        var cards=roadmap.querySelectorAll(":scope>.container>.card");
+        if(cards[0])cards[0].classList.add("allocation-card");
+        if(cards[1])cards[1].classList.add("roadmap-timeline-card");
+      }
+      var home=childDoc.createElement("section");home.id="v2-inicio-extra";home.innerHTML='<div class="container"><div class="section-head"><div><div class="eyebrow">Centro de mando</div><h2>Lo importante ahora</h2></div><p>Una lectura compacta de avance, carga y siguiente acción.</p></div><div class="v2-home-grid" id="v2HomeGrid"></div></div>';
+      var hero=childDoc.querySelector("main>.hero");if(hero)hero.after(home);else main.prepend(home);
+      var energy=childDoc.createElement("section");energy.id="v2-energy-analytics";energy.innerHTML='<div class="container"><div class="v2-energy-head"><div><div class="eyebrow">Productividad · Energía</div><h2>Analítica mensual breve</h2><p style="color:var(--text-2);margin:0">Sueño, enfoque, ejercicio y horas reales para detectar sostenibilidad, no para castigarte.</p></div><label class="field"><span style="color:var(--text-2);font-size:9px;font-weight:800;text-transform:uppercase">Mes</span><input id="v2EnergyMonth" type="month"></label></div><div class="v2-kpis" id="v2EnergyKpis"></div><div class="v2-chart-grid"><article class="v2-chart-card"><h3>Sueño y enfoque</h3><div class="v2-chart-wrap"><canvas id="v2SleepChart"></canvas></div></article><article class="v2-chart-card"><h3>Horas reales de estudio</h3><div class="v2-chart-wrap"><canvas id="v2HoursChart"></canvas></div></article></div><div class="v2-energy-note" id="v2EnergyNote"></div><div class="v2-energy-actions"><button type="button" data-go-view="plan-diario">Registrar el día</button></div></div>';
+      var daily=childDoc.getElementById("plan-diario");if(daily)daily.after(energy);else main.appendChild(energy);
+      childDoc.addEventListener("click",function(event){
+        var go=event.target.closest("[data-go-view]");if(go)showView(go.dataset.goView);
+      });
+      var monthInput=energy.querySelector("#v2EnergyMonth");monthInput.value=selectedMonth;monthInput.addEventListener("change",function(){selectedMonth=monthInput.value||selectedMonth;selectedMonthManual=true;renderEnergy()});
+    }
+
+    function setupFrame(){
+      try{
+        childWin=frame.contentWindow;childDoc=frame.contentDocument;
+        if(!childDoc||!childDoc.body)return;
+        injectCustomViews();
+        var capacity=childDoc.getElementById("dailyCapacity");
+        if(capacity)capacity.dispatchEvent(new childWin.Event("input",{bubbles:true}));
+        activeView=location.hash.replace("#","")||localStorage.getItem(ACTIVE_KEY)||"inicio";
+        if(!viewMap[activeView])activeView="inicio";
+        showView(activeView,false);
+        updateShell();
+        document.getElementById("loading").classList.add("is-hidden");
+        window.addEventListener("storage",function(event){if(event.key===STATE_KEY){updateShell();if(activeView==="energia")renderEnergy()}});
+      }catch(error){showError()}
+    }
+
+    function resetChildModes(){
+      childDoc.body.classList.remove("v2-sources-mode","v2-cert-mode","v2-employ-mode");
+    }
+
+    function setOpenNavGroup(groupName){
+      document.querySelectorAll("[data-nav-group]").forEach(function(group){
+        var isOpen=group.dataset.navGroup===groupName;
+        group.classList.toggle("is-open",isOpen);
+        var toggle=group.querySelector("[data-group-toggle]");
+        if(toggle){
+          toggle.setAttribute("aria-expanded",isOpen?"true":"false");
+        }
+      });
+    }
+
+    function toggleNavGroup(groupName){
+      var group=document.querySelector('[data-nav-group="'+groupName+'"]');
+      if(!group)return;
+      var willOpen=!group.classList.contains("is-open");
+      setOpenNavGroup(willOpen?groupName:"");
+    }
+
+    function showView(view,updateHash){
+      if(!childDoc||!viewMap[view])return;
+      activeView=view;var config=viewMap[view];resetChildModes();
+      childDoc.querySelectorAll("main>section").forEach(function(section){section.classList.remove("v2-visible")});
+      config.sections.forEach(function(selector){var section=childDoc.querySelector(selector);if(section)section.classList.add("v2-visible")});
+      if(config.mode==="sources")childDoc.body.classList.add("v2-sources-mode");
+      if(config.mode==="certifications")childDoc.body.classList.add("v2-cert-mode");
+      if(config.mode==="employ")childDoc.body.classList.add("v2-employ-mode");
+      if(config.mode==="projects-main"||config.mode==="projects-secondary"){
+        var tabName=config.mode;
+        var projectButton=childDoc.querySelector('#proyectos [data-tab="'+tabName+'"]');
+        if(projectButton)projectButton.click();
+      }
+      childWin.scrollTo(0,0);
+      document.querySelectorAll("[data-view]").forEach(function(button){
+        var isActive=button.dataset.view===view;
+        button.classList.toggle("is-active",isActive);
+        if(isActive)button.setAttribute("aria-current","page");else button.removeAttribute("aria-current");
+      });
+      var activeGroup=view==="inicio"?"":config.group.toLowerCase();
+      document.querySelectorAll("[data-nav-group]").forEach(function(group){
+        var hasActive=group.dataset.navGroup===activeGroup;
+        group.classList.toggle("has-active",hasActive);
+        var toggle=group.querySelector("[data-group-toggle]");
+        if(toggle)toggle.classList.toggle("is-active",hasActive);
+      });
+      setOpenNavGroup(activeGroup);
+      document.getElementById("groupLabel").textContent=config.group;document.getElementById("viewTitle").textContent=config.title;
+      localStorage.setItem(ACTIVE_KEY,view);
+      if(updateHash!==false&&location.hash!=="#"+view)history.replaceState(null,"","#"+view);
+      document.body.classList.remove("nav-open");document.getElementById("quickMenu").classList.remove("is-open");
+      if(childWin.TrainerExtensions&&["roadmap","revision-diaria","revision"].includes(view))childWin.TrainerExtensions.refreshViews();
+      if(view==="inicio")renderHome();if(view==="energia"){if(!selectedMonthManual)selectedMonth=localDateKey(new Date()).slice(0,7);renderEnergy()}updateShell();
+    }
+
+    function renderHome(){
+      if(!childDoc)return;var state=readState(),grid=childDoc.getElementById("v2HomeGrid");if(!grid)return;
+      var route=childWin.TrainerExtensions&&childWin.TrainerExtensions.summary();
+      var today=localDateKey(new Date());var day=(state.daily||{})[today];var done=day&&day.tasks?day.tasks.filter(function(t){return t.done}).length:0;var total=day&&day.tasks?day.tasks.length:0;
+      var project=(state.projects||[]).find(function(p){return p.status==="active"})||(state.projects||[])[0];
+      var skill=(state.skills||[]).find(function(s){return Number(s.level)<Number(s.target)&&(!s.evidence||s.evidence.length<12)});
+      var energy=energyScore(day);
+      grid.innerHTML=[
+        homeCard("Siguiente foco",route?route.stage:"Ruta por competencias",route?route.next:"Abre Habilidades para definir tu siguiente competencia.","roadmap","Abrir roadmap"),
+        homeCard("Hoy",done+" de "+total+" tareas",day?sumTasks(day.tasks,"actual")+" h reales":"Todavía sin registro.","plan-diario","Planificar el día"),
+        homeCard("Proyecto activo",project?project.title:"Sin proyecto activo",project?project.summary:"Añade un proyecto y define su decisión.","home-credit","Abrir proyecto"),
+        homeCard("Energía",energy+" / 100",day?"Sueño "+(day.sleep||0)+" h · enfoque "+(day.focus||0)+"/5":"Registra sueño, ejercicio y enfoque.","energia","Ver el mes"),
+        homeCard("Habilidad sin evidencia",skill?skill.name:"Sin brecha urgente",skill?"Nivel "+skill.level+" → "+skill.target+" · "+skill.next:"Revisa el tracker.","habilidades","Abrir habilidades"),
+        homeCard("Fuentes activas",(state.programs||[]).length+" fuentes","AnyoneAI y Futura mantienen la prioridad.","fuentes","Ver fuentes"),
+        homeCard("Lecturas",(state.readings||[]).length+" registradas","Termina cada lectura con notas o aplicación.","lecturas","Abrir lecturas"),
+        homeCard("Revisión","Cierre diario y semanal","Contrasta tareas, competencias y energía para reajustar la ruta.","revision-diaria","Revisar hoy")
+      ].join("");
+    }
+
+    function homeCard(label,title,copy,view,button){
+      return'<article class="v2-home-card"><span>'+esc(label)+'</span><strong>'+esc(title)+'</strong><p>'+esc(copy)+'</p><button type="button" data-go-view="'+esc(view)+'">'+esc(button)+'</button></article>'
+    }
+
+    function renderEnergy(){
+      if(!childDoc)return;var state=readState(),daily=state.daily||{},parts=selectedMonth.split("-"),year=Number(parts[0]),month=Number(parts[1]),daysInMonth=new Date(year,month,0).getDate();
+      var labels=[],sleep=[],focus=[],hours=[],registered=0,exerciseDays=0,sustainable=0,totalHours=0,totalSleep=0,totalFocus=0;
+      for(var d=1;d<=daysInMonth;d++){
+        var key=selectedMonth+"-"+String(d).padStart(2,"0"),day=daily[key];labels.push(String(d));
+        var h=day?sumTasks(day.tasks||[],"actual"):0;hours.push(h);sleep.push(day?Number(day.sleep)||0:null);focus.push(day?Number(day.focus)||0:null);totalHours+=h;
+        if(day){registered++;totalSleep+=Number(day.sleep)||0;totalFocus+=Number(day.focus)||0;if((Number(day.exercise)||0)>=20)exerciseDays++;if((Number(day.sleep)||0)>=7&&(Number(day.focus)||0)>=3)sustainable++}
+      }
+      var avgSleep=registered?totalSleep/registered:0,avgFocus=registered?totalFocus/registered:0,kpis=childDoc.getElementById("v2EnergyKpis");
+      if(kpis)kpis.innerHTML=[
+        kpi("Sueño promedio",avgSleep.toFixed(1)+" h",registered+" días registrados"),
+        kpi("Estudio real",totalHours.toFixed(1)+" h","Suma mensual"),
+        kpi("Días con ejercicio",exerciseDays,"Meta mínima: 20 min"),
+        kpi("Días sostenibles",sustainable,"Sueño ≥7 h y enfoque ≥3")
+      ].join("");
+      var note=childDoc.getElementById("v2EnergyNote");
+      if(note){
+        if(!registered)note.textContent="Aún no hay registros para este mes. Usa Plan diario durante varios días antes de interpretar tendencias.";
+        else if(avgSleep<7)note.textContent="Señal principal: el sueño promedio está por debajo de 7 horas. Reduce alcance antes de expandir las 10 horas disponibles.";
+        else if(avgFocus<3)note.textContent="El sueño es suficiente, pero el enfoque medio es bajo. Revisa bloques, pausas, distracciones y dificultad de las tareas.";
+        else note.textContent="La base energética es razonable. Mantén la carga mientras no caigan sueño o enfoque durante dos días consecutivos.";
+      }
+      drawEnergyCharts(labels,sleep,focus,hours);
+    }
+
+    function kpi(label,value,caption){return'<article class="v2-kpi"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong><small>'+esc(caption)+'</small></article>'}
+
+    function drawEnergyCharts(labels,sleep,focus,hours){
+      if(!childWin||typeof childWin.Chart==="undefined")return;
+      if(energyCharts.sleep)energyCharts.sleep.destroy();if(energyCharts.hours)energyCharts.hours.destroy();
+      var sleepCanvas=childDoc.getElementById("v2SleepChart"),hoursCanvas=childDoc.getElementById("v2HoursChart");if(!sleepCanvas||!hoursCanvas)return;
+      energyCharts.sleep=new childWin.Chart(sleepCanvas,{type:"line",data:{labels:labels,datasets:[{label:"Sueño (h)",data:sleep,borderColor:"#2563eb",backgroundColor:"rgba(37,99,235,.08)",tension:.3,spanGaps:true,yAxisID:"y"},{label:"Enfoque (1–5)",data:focus,borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.08)",tension:.3,spanGaps:true,yAxisID:"y1"}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},scales:{y:{min:0,max:10},y1:{min:0,max:5,position:"right",grid:{drawOnChartArea:false}}},plugins:{legend:{labels:{boxWidth:10,font:{size:10}}}}}});
+      energyCharts.hours=new childWin.Chart(hoursCanvas,{type:"bar",data:{labels:labels,datasets:[{label:"Horas reales",data:hours,backgroundColor:"#7c3aed",borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,suggestedMax:10}},plugins:{legend:{display:false}}}});
+    }
+
+    function updateShell(){
+      if(!childDoc)return;var progress=Number((childDoc.querySelector("[data-global-progress]")||{}).textContent)||0;var hours=(childDoc.querySelector("[data-total-hours]")||{}).textContent||"0";var stage=(childDoc.querySelector("[data-current-week]")||{}).textContent||"Ruta por competencias";
+      document.getElementById("shellProgress").textContent=progress+"%";document.getElementById("shellProgressBar").style.width=progress+"%";document.getElementById("shellSummary").textContent=stage+" · "+hours+" horas registradas";
+    }
+
+    function performQuick(type){
+      var map={project:["proyectos-secundarios","#addProjectBtn"],skill:["habilidades","#addSkillBtn"],task:["plan-diario","#addDailyTaskBtn"],reading:["lecturas","#addReadingBtn"]},item=map[type];if(!item)return;
+      showView(item[0]);var button=childDoc.querySelector(item[1]);if(button)button.click();updateShell();
+    }
+
+    function proxyClick(selector){
+      if(!childDoc)return;var button=childDoc.querySelector(selector);if(button)button.click();
+    }
+
+    function showError(){document.getElementById("loading").classList.add("is-hidden");document.getElementById("errorPanel").classList.add("is-visible")}
+
+    function bindShell(){
+      document.getElementById("mainNav").addEventListener("click",function(event){
+        var viewButton=event.target.closest("[data-view]");
+        if(viewButton){showView(viewButton.dataset.view);return}
+        var groupButton=event.target.closest("[data-group-toggle]");
+        if(groupButton)toggleNavGroup(groupButton.dataset.groupToggle);
+      });
+      document.getElementById("menuBtn").addEventListener("click",function(){document.body.classList.toggle("nav-open")});document.getElementById("backdrop").addEventListener("click",function(){document.body.classList.remove("nav-open")});
+      document.getElementById("quickAddBtn").addEventListener("click",function(){document.getElementById("quickMenu").classList.toggle("is-open")});document.getElementById("quickMenu").addEventListener("click",function(event){var button=event.target.closest("[data-quick]");if(button)performQuick(button.dataset.quick)});
+      document.getElementById("editBtn").addEventListener("click",function(){proxyClick("#editBtn");var editing=childDoc&&childDoc.body.classList.contains("is-editing");document.getElementById("editBtn").classList.toggle("primary",editing);document.getElementById("editBtn").querySelector(".action-label").textContent=editing?"Cerrar edición":"Editar"});
+      document.getElementById("themeBtn").addEventListener("click",function(){var next=document.documentElement.dataset.theme==="dark"?"light":"dark";document.documentElement.dataset.theme=next;localStorage.setItem(SHELL_THEME_KEY,next);if(childDoc&&childDoc.documentElement.dataset.theme!==next)proxyClick("#themeBtn")});
+      document.getElementById("exportBtn").addEventListener("click",function(){proxyClick("#exportBtn")});document.getElementById("importBtn").addEventListener("click",function(){proxyClick("#importBtn")});document.getElementById("resetBtn").addEventListener("click",function(){proxyClick("#resetBtn")});
+      document.addEventListener("click",function(event){if(!event.target.closest("#quickAddBtn")&&!event.target.closest("#quickMenu"))document.getElementById("quickMenu").classList.remove("is-open")});
+      window.addEventListener("hashchange",function(){var view=location.hash.replace("#","");if(viewMap[view])showView(view,false)});
+    }
+
+    async function loadTrainer(){
+      try{
+        var response=await fetch(BASE_FILE,{cache:"no-store"});if(!response.ok)throw new Error("Base unavailable");
+        var html=await response.text();
+        html=html.replaceAll("tech-career-trainer-v1",STATE_KEY).replaceAll("tech-career-trainer-theme",THEME_KEY).replace("<title>Trainer de Carrera Tech — Centro de aprendizaje</title>","<title>Trainer de Carrera Tech v2 — Contenido</title>");
+        frame.addEventListener("load",setupFrame,{once:true});frame.srcdoc=html;
+      }catch(error){
+        frame.addEventListener("load",function(){try{setupFrame()}catch(e){showError()}},{once:true});frame.src=BASE_FILE;
+      }
+    }
+
+    document.documentElement.dataset.theme=localStorage.getItem(SHELL_THEME_KEY)||"light";
+    bindShell();loadTrainer();
+  })();
+  </script>
+</body>
+</html>

@@ -86,7 +86,7 @@
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
     @media print{@page{size:A4;margin:1.4cm}:root,:root[data-theme="dark"]{--bg:#fff;--card:#fff;--text:#000;--text-2:#333;--border:#bbb;--accent:#174ea6;--shadow:none}body{background:#fff;color:#000;font-size:9pt}.site-header,.no-print,.btn,.tabs,.toast{display:none!important}.container{width:100%}main{padding:0}section{margin-top:28px}.hero{padding:0}h1{font-size:28pt}.card,details.week,.project-card{box-shadow:none;break-inside:avoid}.tab-content{display:block!important}details.week .week-body{display:block!important}.table-responsive{overflow:visible}a{color:#000;text-decoration:none}}
   </style>
-  <link rel="stylesheet" href="trainer-extensions-v3.css">
+  <link rel="stylesheet" href="trainer-extensions-v4.css">
 </head>
 <body>
   <header class="site-header">
@@ -109,7 +109,7 @@
     <section class="hero">
       <div class="container hero-grid">
         <div>
-          <div class="eyebrow">Centro unificado de carrera</div>
+          <div class="eyebrow">Centro unificado de carrera · <span data-current-date></span></div>
           <h1 class="editable" data-edit-key="hero.title">Tu entrenamiento profesional, en un solo sistema</h1>
           <p class="hero-copy editable" data-edit-key="hero.copy">Integra AnyoneAI, Futura, recursos puntuales de Coursera, un portafolio exigente y el cuidado de tu energía sin perder de vista la ruta hacia Decision Scientist / Data Scientist aplicado.</p>
           <div class="hero-meta">
@@ -377,7 +377,7 @@
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="trainer-extensions-v3.js"></script>
+  <script src="trainer-extensions-v4.js"></script>
   <script>
   (function(){
     "use strict";
@@ -458,6 +458,7 @@
     var editMode=false;
     var currentReviewWeek="week-1";
     var currentDate=isoDate(new Date());
+    var plannerFollowsToday=true;
 
     function clone(v){return JSON.parse(JSON.stringify(v))}
     function mergeDefaults(saved,defaults){
@@ -624,7 +625,7 @@
       body.addEventListener("click",function(e){var row=e.target.closest("[data-skill-id]");if(!row)return;var i=state.skills.findIndex(function(s){return s.id===row.dataset.skillId}),s=state.skills[i];if(e.target.closest("[data-delete-skill]")&&confirm("¿Eliminar esta habilidad?")){state.skills.splice(i,1);saveState();renderSkills();return}if(e.target.closest("[data-save-skill]")){var values={};row.querySelectorAll("[data-skill-field]").forEach(function(el){values[el.dataset.skillField]=el.value});var desired=Number(values.level),err=row.querySelector(".skill-error");if(desired>s.lastSavedLevel&&String(values.evidence||"").trim().length<12){err.textContent="Añade evidencia concreta antes de subir de nivel.";row.querySelector('[data-skill-field="level"]').value=s.lastSavedLevel;return}Object.keys(values).forEach(function(k){s[k]=["target","level","hours"].includes(k)?Number(values[k]):values[k]});s.lastSavedLevel=s.level;err.textContent="";saveState();toast("Habilidad guardada")}});document.getElementById("addSkillBtn").addEventListener("click",function(){state.skills.push({id:uid("skill"),name:"Nueva habilidad",category:"Personalizada",target:1,level:0,hours:0,evidence:"",status:"pending",next:"Definir siguiente acción",lastSavedLevel:0});saveState();renderSkills()});
     }
     function bindDaily(){
-      document.getElementById("plannerDate").addEventListener("change",function(e){currentDate=e.target.value||isoDate(new Date());renderDaily();updateDashboard()});
+      document.getElementById("plannerDate").addEventListener("change",function(e){currentDate=e.target.value||isoDate(new Date());plannerFollowsToday=currentDate===isoDate(new Date());renderDaily();updateDashboard()});
       document.getElementById("dailyTasks").addEventListener("input",function(e){var d=ensureDay(currentDate),i=Number(e.target.dataset.index);if(e.target.dataset.dailyField)d.tasks[i][e.target.dataset.dailyField]=["planned","actual"].includes(e.target.dataset.dailyField)?Number(e.target.value):e.target.value;saveState()});
       document.getElementById("dailyTasks").addEventListener("change",function(e){if(e.target.dataset.dailyDone!=null){ensureDay(currentDate).tasks[Number(e.target.dataset.dailyDone)].done=e.target.checked;saveState()}});
       document.getElementById("dailyTasks").addEventListener("click",function(e){if(e.target.dataset.deleteDaily!=null){ensureDay(currentDate).tasks.splice(Number(e.target.dataset.deleteDaily),1);saveState();renderDaily()}});
@@ -652,7 +653,7 @@
       document.getElementById("printBtn").addEventListener("click",function(){window.print()});
       document.getElementById("exportBtn").addEventListener("click",function(){var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="trainer-carrera-tech-"+isoDate(new Date())+".json";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000);toast("Copia exportada")});
       document.getElementById("importBtn").addEventListener("click",function(){document.getElementById("importFile").click()});document.getElementById("importFile").addEventListener("change",function(e){var file=e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(){try{state=mergeDefaults(JSON.parse(reader.result),defaultState);saveState();renderAll();toast("Copia restaurada")}catch(err){alert("El archivo no contiene una copia válida.")}};reader.readAsText(file);e.target.value=""});
-      document.getElementById("resetBtn").addEventListener("click",function(){if(confirm("¿Reiniciar todo el Trainer? Exporta una copia si deseas conservar el progreso.")){state=clone(defaultState);localStorage.removeItem(STORAGE_KEY);currentDate=isoDate(new Date());currentReviewWeek="week-1";renderAll();toast("Trainer reiniciado")}});
+      document.getElementById("resetBtn").addEventListener("click",function(){if(confirm("¿Reiniciar todo el Trainer? Exporta una copia si deseas conservar el progreso.")){state=clone(defaultState);localStorage.removeItem(STORAGE_KEY);currentDate=isoDate(new Date());plannerFollowsToday=true;currentReviewWeek="week-1";renderAll();toast("Trainer reiniciado")}});
       document.getElementById("dailyCapacity").addEventListener("input",function(e){state.capacity.daily=clamp(e.target.value,1,16);saveState();renderAllocation()});document.getElementById("studyDays").addEventListener("input",function(e){state.capacity.days=clamp(e.target.value,1,7);saveState();renderAllocation()});
     }
     function renderAll(){
@@ -662,6 +663,16 @@
     document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||"light";
     bindTabs();bindPrograms();bindWeeks();bindProjects();bindSkills();bindDaily();bindReadings();bindEmploy();bindReview();bindHeader();renderAll();
     if(window.TrainerExtensions)window.TrainerExtensions.init({getState:function(){return state},save:saveState,isoDate:isoDate,refreshDashboard:updateDashboard});
+    function scheduleLocalDayChange(){
+      var now=new Date(),next=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);
+      setTimeout(function(){
+        document.querySelectorAll("[data-current-date]").forEach(function(el){el.textContent=todayLabel()});
+        if(plannerFollowsToday){currentDate=isoDate(new Date());renderDaily();updateDashboard()}
+        if(window.TrainerExtensions)window.TrainerExtensions.onLocalDateChange();
+        scheduleLocalDayChange();
+      },Math.max(1000,next.getTime()-now.getTime()+1000));
+    }
+    scheduleLocalDayChange();
   })();
   </script>
 </body>

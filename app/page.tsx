@@ -3,7 +3,7 @@ export default function Home() {
     <main className="site-shell">
       <iframe
         className="trainer-frame"
-        src="/trainer-carrera-tech-v3.html"
+        src="/trainer-carrera-tech-v4.html"
         title="Trainer de Carrera Tech"
       />
     </main>

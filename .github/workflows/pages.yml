@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preparar versión estática
-        run: cp public/trainer-carrera-tech-v3.html public/index.html
+        run: cp public/trainer-carrera-tech-v4.html public/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
