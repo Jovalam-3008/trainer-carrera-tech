@@ -55,6 +55,13 @@
 .tc-mastery-checks label{display:flex;align-items:center;gap:5px}
 .tc-mastery-checks input{accent-color:var(--green)}
 .tc-evidence-panel small{color:var(--text-2);font-size:10px}
+.tc-learning-loop{margin:10px 0;border:1px solid var(--border);border-radius:6px;background:var(--card)}
+.tc-learning-loop>summary{padding:8px 10px;color:var(--accent);cursor:pointer;font-size:10px;font-weight:800}
+.tc-learning-fields{display:grid;gap:10px;padding:0 10px 10px}
+.tc-learning-fields label{display:grid;gap:5px;color:var(--text-2);font-size:10px;font-weight:800}
+.tc-learning-fields textarea{width:100%;min-height:58px;padding:8px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text);font-size:11px;resize:vertical}
+.tc-quiz-row{display:flex;align-items:end;flex-wrap:wrap;gap:12px}
+.tc-quiz-row input{width:85px;min-height:30px;padding:5px;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--text)}
 .tc-module-footer{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-top:18px;padding:14px;border:1px solid var(--border);border-radius:6px;background:var(--soft)}
 .tc-module-footer strong{font-size:11px}
 .tc-module-footer p{margin:4px 0 0;color:var(--text-2);font-size:11px}

@@ -184,6 +184,7 @@
       '<button class="tc-mini tc-muted" type="button" data-remove-topic title="' + (topic.custom ? 'Eliminar competencia' : data.hidden ? 'Restaurar competencia' : 'Ocultar competencia') + '">' + (topic.custom ? 'Eliminar' : data.hidden ? 'Restaurar' : 'Ocultar') + '</button></div>' +
       '<div class="tc-evidence-panel"' + (evidenceOpen.has(topic.key) ? '' : ' hidden') + '><label>Evidencia concreta o enlace<textarea data-topic-evidence placeholder="Qué construiste, explicaste o resolviste">' + esc(data.evidence || '') + '</textarea></label>' +
       '<div class="tc-mastery-checks"><label><input type="checkbox" data-master="explain"' + (data.explain ? ' checked' : '') + '> Puedo explicarlo</label><label><input type="checkbox" data-master="apply"' + (data.apply ? ' checked' : '') + '> Puedo aplicarlo</label><label><input type="checkbox" data-master="solve"' + (data.solve ? ' checked' : '') + '> Resuelvo un problema sin tutorial</label></div>' +
+      '<details class="tc-learning-loop"><summary>Explicar · English · quiz</summary><div class="tc-learning-fields"><label>Explícalo en español<textarea data-topic-field="explanationEs" placeholder="Explica con tus palabras, sin mirar notas">' + esc(data.explanationEs || '') + '</textarea></label><label>Explain it in English<textarea data-topic-field="explanationEn" placeholder="Explain the idea and one practical use in English">' + esc(data.explanationEn || '') + '</textarea></label><div class="tc-quiz-row"><button type="button" class="tc-mini" data-copy-quiz>Copiar prompt de quiz avanzado</button><label>Resultado / 5<input type="number" min="0" max="5" step="1" data-topic-field="quizScore" value="' + esc(data.quizScore == null ? '' : data.quizScore) + '"></label></div><small>El botón prepara preguntas para usar en ChatGPT u otra IA; no envía tus datos automáticamente.</small></div></details>' +
       '<small>“Dominado” exige las tres comprobaciones y una evidencia de al menos 12 caracteres.</small></div></div>';
   }
   function moduleCard(module, previousOpen) {
@@ -229,6 +230,7 @@
       const data = state().competencies[key] || (state().competencies[key] = {});
       if (event.target.matches("[data-topic-label]")) data.label = event.target.value.trim();
       if (event.target.matches("[data-topic-evidence]")) data.evidence = event.target.value.trim();
+      if (event.target.matches("[data-topic-field]")) data[event.target.dataset.topicField] = event.target.value;
       if (event.target.matches("[data-master]")) data[event.target.dataset.master] = event.target.checked;
       if (event.target.matches("[data-topic-status]")) {
         const desired = Number(event.target.value);
@@ -239,13 +241,23 @@
           alert("Para marcar Dominado, registra una evidencia concreta y confirma que puedes explicarlo, aplicarlo y resolver un problema sin tutorial.");
         } else data.status = desired;
       }
-      if (data.status === 3 && !masteryReady(data)) data.status = 2;
+      const lostMastery = data.status === 3 && !masteryReady(data);
+      if (lostMastery) data.status = 2;
       api.save();
-      if (!event.target.matches("[data-topic-evidence]")) renderCompetencies();
+      if (lostMastery || event.target.matches("[data-topic-status],[data-topic-label]")) renderCompetencies();
     });
     root.addEventListener("click", event => {
       const row = event.target.closest("[data-topic]");
       if (!row) return;
+      if (event.target.closest("[data-copy-quiz]")) {
+        const moduleName = row.closest(".tc-module").querySelector(".tc-module-title strong").textContent;
+        const topicName = row.querySelector("[data-topic-label]").value;
+        const prompt = "Actúa como evaluador exigente de AI/ML Engineering. Módulo: " + moduleName + ". Tema: " + topicName + ". Hazme 5 preguntas avanzadas: 3 de razonamiento y 2 casos de aplicación o debugging. No reveles las respuestas todavía. Espera mis respuestas y luego corrige con rúbrica de 0 a 5, explica errores, dame una pregunta oral para explicar el tema y otra para responder en inglés. Termina proponiendo un repaso concreto y una mini evidencia práctica.";
+        const button = event.target.closest("[data-copy-quiz]");
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(prompt).then(() => { button.textContent = "Prompt copiado"; }, () => { promptFallback(prompt); });
+        else promptFallback(prompt);
+        return;
+      }
       if (event.target.closest("[data-toggle-evidence]")) { const key = row.dataset.topic; const panel = row.querySelector(".tc-evidence-panel"); panel.hidden = !panel.hidden; if (panel.hidden) evidenceOpen.delete(key); else evidenceOpen.add(key); }
       if (event.target.closest("[data-remove-topic]")) {
         const key = row.dataset.topic;
@@ -264,6 +276,7 @@
     });
     renderCompetencies();
   }
+  function promptFallback(prompt) { window.prompt("Copia este prompt para tu IA:", prompt); }
 
   function calendarOccurrence(event, date) {
     if (event.repeat === "weekly") return date >= event.date && dateAtNoon(date).getDay() === dateAtNoon(event.date).getDay();
